@@ -1,0 +1,54 @@
+Steps to Fix the Issue
+1. Create tsconfig.node.json
+Create a tsconfig.node.json file in the root of your project with the following content:
+
+json
+Copy
+{
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "include": ["vite.config.ts"],
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  }
+}
+This file is used for TypeScript configuration related to Node.js (e.g., Vite's configuration file).
+
+2. Create tsconfig.app.json
+Create a tsconfig.app.json file in the root of your project with the following content:
+
+json
+Copy
+{
+  "extends": "@tsconfig/vite-react/tsconfig.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+This file is used for TypeScript configuration related to your application code.
+
+3. Update tsconfig.json
+Your main tsconfig.json file should extend one of the above configuration files. Update it to look like this:
+
+json
+Copy
+{
+  "extends": "./tsconfig.app.json"
+}
+4. Install Required Dependencies
+Ensure you have the required @tsconfig packages installed. Run:
+
+bash
+Copy
+npm install @tsconfig/node20 @tsconfig/vite-react --save-dev
+5. Restart the Development Server
+After creating the configuration files, restart the Vite development server:
+
+bash
+Copy
+npm run dev
