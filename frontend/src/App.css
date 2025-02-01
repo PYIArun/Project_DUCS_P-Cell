@@ -1,0 +1,31 @@
+@media only screen and (max-width: 900px) {
+
+    body > div {
+      margin-left: 0;
+    }
+  }
+  
+  
+  @media (min-width: 112.5em) {
+    html {
+      font-size: 75%;
+    }
+  }
+  
+  @media (max-width: 75em) {
+    html {
+      font-size: 56.25%;
+    }
+  }
+  
+  @media (max-width: 56.25em) {
+    html {
+      font-size: 50%;
+    }
+  }
+  
+  @media (max-width: 37.5em) {
+    html {
+      font-size: 37.5%;
+    }
+  }
