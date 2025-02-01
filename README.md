@@ -6,4 +6,9 @@ Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+Tailwind Version Used : npm install tailwindcss@3.3.0 
+
+Steps taken to setup this project: https://ui.shadcn.com/docs/installation/vite  + (to fix the typscript error: refer to docs/typescriptfix.txt)
+
 # Project_DUCS_P-Cell
