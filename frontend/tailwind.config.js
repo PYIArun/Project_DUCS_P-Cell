@@ -1,8 +1,13 @@
+const {heroui} = require('@heroui/theme');
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
     darkMode: ["class"],
-    content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "./node_modules/@heroui/theme/dist/components/(button|scroll-shadow|ripple|spinner).js"
+  ],
   theme: {
   	extend: {
 		fontFamily: {
