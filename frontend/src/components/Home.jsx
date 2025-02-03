@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FaRegFilePdf } from "react-icons/fa";
-import { Slider } from "./Slider";
+
 
 const slides = [
   "./images/slides/1.jpeg",
@@ -106,7 +106,6 @@ const Home = () => {
 
           <div className="w-[90%] mx-auto">
             
-            <Slider/>
             </div>
         </div>
       </div>
