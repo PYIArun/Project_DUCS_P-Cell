@@ -32,6 +32,9 @@ input {
   background-color: red;
 }
 
+h1 {
+  text-align: center;
+}
 .div{
   color: red;
 }
