@@ -60,3 +60,9 @@ body{
 .swiper-button-prev {
   left: 20px; /* Position to the left */
 }
+h1 {
+  text-align: center;
+}
+.div{
+  color: red;
+}
