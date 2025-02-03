@@ -28,10 +28,35 @@ body{
   background: #edf2f7;
 }
 
-input {
-  background-color: red;
+
+/* Style the adjacent slides with lower opacity */
+.swiper-slide {
+  opacity: 0.5; /* Default opacity */
+  transition: opacity 0.3s ease; /* Smooth transition */
 }
 
-.div{
-  color: red;
+.swiper-slide-active {
+  opacity: 1; /* Full opacity for the active slide */
+}
+
+.swiper-slide-next,
+.swiper-slide-prev {
+  opacity: 0.7; /* Adjacent slides with slightly lower opacity */
+}
+
+/* Fix the visibility and positioning of arrows */
+.swiper-button-next,
+.swiper-button-prev {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.swiper-button-next {
+  right: 20px; /* Position to the right */
+}
+
+.swiper-button-prev {
+  left: 20px; /* Position to the left */
 }
