@@ -27,3 +27,7 @@ body{
 ::-webkit-scrollbar-track {
   background: #edf2f7;
 }
+
+input {
+  background-color: red;
+}

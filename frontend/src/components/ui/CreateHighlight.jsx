@@ -18,8 +18,10 @@ import { use } from 'react';
 const CreateHighlight = () => {
   const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
-  const [set, setset] = useState("");
-  const [det, setdet] = useState("");
+
+  const HighlightFormSubmit = () => {
+    console.log({title, link});
+  }
 
   return (
     <div className=''>
@@ -37,19 +39,19 @@ const CreateHighlight = () => {
               <div className="grid w-full items-center gap-4">
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="title">Title</Label>
-                  <Input id="title" placeholder="Title for the Highlight" />
+                  <Input id="title" onChange={(e) => setTitle(e.target.value)} value={title}  placeholder="Title for the Highlight" />
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="link">Link</Label>
                   
-                  <Input id="link" placeholder="Google drive link" />
+                  <Input onChange={(e) => setLink(e.target.value)} value={link}  id="link" placeholder="Google drive link" />
                 </div>
               </div>
             </form>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button>Cancel</Button>
-            <Button className='rounded-[0.7rem] active:scale-95  active:transition-all transition-all ease-in  active:ease-in' variant="outline">Create</Button>
+            <Button onClick = {() => {setLink(""); setTitle("");}}>Cancel</Button>
+            <Button onClick={HighlightFormSubmit} className='rounded-[0.7rem] active:scale-95  active:transition-all transition-all ease-in  active:ease-in' variant="outline">Create</Button>
           </CardFooter>
         </Card>
       </div>
