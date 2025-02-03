@@ -18,6 +18,8 @@ import { use } from 'react';
 const CreateHighlight = () => {
   const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
+  const [set, setset] = useState("");
+  const [det, setdet] = useState("");
 
   return (
     <div className=''>
