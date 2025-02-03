@@ -1,14 +1,12 @@
-import React from 'react'
-import Header from './components/Header'
-import Home from './components/Home'
+import { Routes, Route } from 'react-router-dom';
+import Homepage from './components/Homepage.jsx';
+import CreateHighlight from './components/ui/CreateHighlight.jsx';
 
-const App = () => {
+export default function App() {
   return (
-    <div className='h-screen'>
-        <Header></Header>
-        <Home></Home>
-    </div>
-  )
+    <Routes>
+      <Route path="/" element={<Homepage />} />
+      <Route path="/highlight" element={<CreateHighlight />} />
+    </Routes>
+  );
 }
-
-export default App
