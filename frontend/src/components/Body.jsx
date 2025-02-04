@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { FaRegFilePdf } from "react-icons/fa";
 import Slider from "./Slider";
+import Marquee from "./ui/Marquee/Marquee";
 
 
 const slides = [
@@ -99,10 +100,22 @@ const Body = () => {
           </div>
         </div>
 
+
         {/* Past Recruiters Section */}
         <div className="my-[5rem]">
           <h2 className="text-center font-instrument text-[1.5rem] md:text-[2rem] text-[#72265F] font-semibold">
             Past Recruiters
+          </h2>
+
+          <div className="w-[90%] mx-auto">
+            <Marquee/>
+            </div>
+        </div>
+
+        {/* Past Alumni Section */}
+        <div className="my-[5rem]">
+          <h2 className="text-center font-instrument text-[1.5rem] md:text-[2rem] text-[#72265F] font-semibold">
+            Past Alumni
           </h2>
 
           <div className="w-[90%] mx-auto">
