@@ -23,7 +23,7 @@ export default function Carousel({
   }, [autoSlide, autoSlideInterval]); // Remove `curr` from dependencies
 
   return (
-    <div className="overflow-hidden relative h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[48rem]">
+    <div className="overflow-hidden relative mobile:h-[14rem] h-[20rem] sm:h-[30rem] md:h-[40rem] lg:h-[48rem]">
       {/* Slides Container */}
       <div
         className="flex transition-transform ease-out duration-500 h-full"

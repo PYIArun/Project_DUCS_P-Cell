@@ -10,6 +10,10 @@ module.exports = {
   ],
   theme: {
   	extend: {
+		screens: {
+			'sm350': '350px', // Custom breakpoint for 350px
+			'mobile': {'max': '639px'}, // Custom max-width: 639px breakpoint
+		},
 		fontFamily: {
 			instrument: ['"Instrument Sans"', 'sans-serif'],
 		},

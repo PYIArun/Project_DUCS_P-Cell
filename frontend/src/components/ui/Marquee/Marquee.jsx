@@ -30,7 +30,7 @@ const images2 = [
 const Marquee = () => {
   return (
     <div className="marquee-container">
-      <div className="wrapper">
+      <div className="wrapper ">
       {images1.map((image, index) => (
         <div key={index} className={`itemLeft item${index + 1}`}>
           <img src={image} alt={`Image ${index + 1}`} />
