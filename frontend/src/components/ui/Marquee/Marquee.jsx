@@ -32,7 +32,7 @@ const Marquee = () => {
     <div className="marquee-container">
       <div className="wrapper ">
       {images1.map((image, index) => (
-        <div key={index} className={`itemLeft item${index + 1}`}>
+        <div key={index} className={`itemLeft item${index + 1} `}>
           <img src={image} alt={`Image ${index + 1}`} />
         </div>
       ))}

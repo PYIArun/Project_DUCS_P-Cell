@@ -72,13 +72,13 @@ function Slider() {
         ))}
 
         {/* Navigation Controls */}
-        <div className="slider-controler mt-4 sm:mt-8 flex items-center justify-center gap-4">
+        {/* <div className="slider-controler mt-4 sm:mt-8 flex items-center justify-center gap-4">
           <MdOutlineSwipeLeft className='text-[2rem] sm:text-[3rem] swiper-button-prev slider-arrow opacity-80 rounded-full cursor-pointer'/>
           <MdOutlineSwipeRight className='text-[2rem] sm:text-[3rem] swiper-button-next slider-arrow opacity-80 rounded-full cursor-pointer'/>
-        </div>
+        </div> */}
         
         {/* Pagination */}
-        <div className="swiper-pagination relative w-40 sm:w-60 bottom-2 sm:bottom-4"></div>
+        {/* <div className="swiper-pagination relative w-40 sm:w-60 bottom-2 sm:bottom-4"></div> */}
       </Swiper>
     </div>
   );

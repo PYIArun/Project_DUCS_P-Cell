@@ -91,8 +91,9 @@ const CreateHighlight = () => {
               </form>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button className='active:scale-105 transition-all ease-in' onClick={() => { setLink(""); setTitle(""); }}>Cancel</Button>
-              <Button onClick={HighlightFormSubmit} disabled={isSubmitting} className='rounded-[0.7rem] active:scale-105 transition-all ease-in' variant="outline">Create</Button>
+              <Button className='select-none font-instrument px-[1.25rem] py-[0.5rem] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] text-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold rounded-[0.5rem]' onClick={() => { setLink(""); setTitle(""); }}>Cancel</Button>
+              <Button onClick={HighlightFormSubmit} disabled={isSubmitting}  className='select-none font-instrument px-[1.25rem] py-[0.5rem] bg-[#72265F] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold text-white rounded-[0.5rem]'>Create</Button>
+              {/* <Button className='rounded-[0.7rem] active:scale-105 transition-all ease-in' variant="outline">Create</Button> */}
             </CardFooter>
           </Card>
         </div>

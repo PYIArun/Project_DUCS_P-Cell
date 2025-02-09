@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import {
   Card,
@@ -23,6 +23,8 @@ import { FaLinkedin } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { BsFillTelephoneFill } from "react-icons/bs";
 import { Mail } from "react-feather";
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 
 const coordinators = [
@@ -38,10 +40,21 @@ const coordinators = [
 ];
 
 const Body = () => {
+
+  const [highlights, setHighlights] = useState([]);
+
+  
+  useEffect(() => {
+    axios.get('http://localhost:5000/highlights')
+      .then(response => setHighlights(response.data))
+      .catch(error => console.error(error));
+  }, [highlights]);
+
+
   return (
     <div className="bg-[#F8F7F9] font-instrument">
       {/* Carousel Section */}
-      <div className="carousel mt-[2rem] w-[90%] mx-auto">
+      <div className="carousel w-[90%] mx-auto">
         <Carousel autoSlide={true} autoSlideInterval={3000}>
           {slides.map((s, index) => (
             <img key={index} src={s} alt={`Slide ${index + 1}`} />
@@ -60,26 +73,26 @@ const Body = () => {
             </h2>
 
             <div className="mt-[2rem]">
-              <Card className="bg-white w-full rounded-[0.7rem] py-[1rem] mx-auto h-[40rem] overflow-y-scroll">
+              <Card className="mobile:h-[30rem] bg-white w-full rounded-[0.7rem] py-[1rem] mx-auto h-[40rem] overflow-y-scroll">
                 <CardContent>
-                  {[...Array(7)].map((_, index) => (
+                  {highlights.map((highlight) => (
                     <Card
-                      key={index}
+                      key={highlight._id}
                       className="my-[1rem] rounded-[0.7rem] items-center flex"
                     >
                       <div className="w-[5rem] h-[5rem] bg-[#F2DFFA] rounded-sm flex flex-col justify-center relative items-center">
                         <h1 className="font-instrument text-[#642A7C] font-semibold text-[2rem] absolute top-2">
-                          2
+                        {new Date(highlight.date_of_post).getDate()}
                         </h1>
                         <h2 className="font-instrument text-[#642A7C] font-semibold text-[1rem] absolute bottom-3">
-                          Jan
+                        {new Date(highlight.date_of_post).toLocaleString('default', { month: 'short' })}
                         </h2>
                       </div>
                       <div className="flex flex-row justify-between items-center w-[93%] px-[1rem]">
                         <h2 className="font-instrument text-[1.1rem] mobile:text-[0.8rem]">
-                          Here we gonna put the title of the highlights
+                          {highlight.title}
                         </h2>
-                        <a href="#">
+                        <a href={highlight.gdrive_link} target="__blank">
                           <FaRegFilePdf className="text-[2rem] hover:scale-105 active:scale-95 cursor-pointer text-[#642A7C] transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all" />
                         </a>
                       </div>
@@ -182,7 +195,7 @@ const Body = () => {
         </div>
 
 {/* Placement Team */}
-        <div className="mt-[5rem]">
+        <div id="placement_team" className="mt-[5rem] ">
           <h2 className="text-center font-instrument text-[1.5rem] md:text-[2rem] text-[#72265F] font-semibold">
             Placement Team
           </h2>

@@ -15,7 +15,7 @@
 body{
   height: 100%;
   width: 100%;
-  background-color:#F8F7F9;
+  /* background-color:#F8F7F9; */
 }
 /* Add this to your global CSS file */
 ::-webkit-scrollbar {

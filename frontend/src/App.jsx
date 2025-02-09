@@ -6,6 +6,9 @@ import Login from './components/Login/Login.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from './components/Footer.jsx';
+import Register from './components/Register.jsx';
+import CompanyListing from './components/CompanyListing.jsx';
+import EditProfile from './components/EditProfile.jsx';
 
 export default function App() {
   return (
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="/" element={<Homepage />} />
         <Route path="/highlight" element={<CreateHighlight />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/companylistings" element={<CompanyListing />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
       </Routes>
       <Footer/>
     </>

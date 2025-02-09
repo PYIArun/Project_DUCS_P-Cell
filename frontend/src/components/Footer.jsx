@@ -7,8 +7,7 @@ const Footer = () => {
         <h2 className="text-white font-semibold">© Copyright Placement Cell, DUCS. All Rights Reserved</h2>
         <h2 className="text-white font-semibold"> Designed and developed with &#129293; by Shyam & Arun.</h2>
     </div>
-
-
+    
     </>
     
   )
