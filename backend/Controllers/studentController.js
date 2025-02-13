@@ -1,35 +1,61 @@
-const Student = require('../Models/Students');
+const Student = require('../Models/Student');
 
 const registerStudent = async (req, res) => {
   try {
-      const { email, collegeRollNo, name, course, dob, gender, tenthCGPA, twelfthCGPA, ugCGPA, pgCGPA, backlogs } = req.body;
+    const { 
+      email, collegeRollNo, name, mobileNo, course, dob, gender, 
+      tenthCGPA, twelfthCGPA, ugCGPA, pgCGPA, backlogs 
+    } = req.body;
 
-      const student = await Student.findOne({ email });
+    console.log("Incoming Request Body:", req.body); // Debug log
 
-      if (!student) {
-          return res.status(404).json({ message: "Student not found." });
-      }
+    // Check if student exists
+    const student = await Student.findOne({ email });
 
-      // Update student with registration details
-      student.collegeRollNo = collegeRollNo;
-      student.name = name;
-      student.course = course;
-      student.dob = dob;
-      student.gender = gender;
-      student.tenthCGPA = tenthCGPA;
-      student.twelfthCGPA = twelfthCGPA;
-      student.ugCGPA = ugCGPA;
-      student.pgCGPA = pgCGPA;
-      student.backlogs = backlogs;
-      student.registered = "yes"; // Mark as registered
+    if (!student) {
+      console.log("Student not found in DB:", email);
+      return res.status(404).json({ message: "Student not found." });
+    }
 
-      await student.save();
+    // Fields to update
+    const updatedFields = {
+      collegeRollNo,
+      name,
+      mobileNo,  // ✅ Ensure this is received in req.body
+      course,
+      dob,
+      gender,
+      tenthCGPA,
+      twelfthCGPA,
+      ugCGPA,
+      pgCGPA: pgCGPA || null,
+      backlogs,
+      registered: "yes",
+    };
 
-      res.status(200).json({ message: "Registration successful." });
+    console.log("Updated Fields Before DB Update:", updatedFields); // Debug log
+
+    // Update student data
+    const updatedStudent = await Student.findOneAndUpdate(
+      { email },
+      { $set: updatedFields },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedStudent) {
+      console.log("Error: Student update failed.");
+      return res.status(500).json({ message: "Failed to update student details." });
+    }
+
+    console.log("Student Updated Successfully:", updatedStudent); // Debug log
+    res.status(200).json({ message: "Registration successful.", student: updatedStudent });
+
   } catch (error) {
-      res.status(400).json({ message: error.message });
+    console.error("Error in registerStudent:", error); // Log full error stack
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 const getStudentByEmail = async (req, res) => {
   try {
