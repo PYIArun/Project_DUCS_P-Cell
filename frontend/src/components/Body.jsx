@@ -26,29 +26,24 @@ import { Mail } from "react-feather";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
-
-const coordinators = [
-  { name: 'Arun Chandra', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890' },
-  { name: 'Shad Jamil', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890'},
-  { name: 'Tanmay Chowdhary', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890'},
-  { name: 'Prachi Bhatia', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890'},
-  { name: 'Nishant Sharma', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890'},
-  { name: 'Mayank Sharma', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890' },
-  { name: 'Bharat Chudasama', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890' },
-  { name: 'Akanksha Yadav', role: 'Placement Coordinator', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890' },
-  { name: 'Deepak Goyal', role: 'Treasurer', email: 'arunmca24@gmail.com', linkedin: 'https://www.linkedin.com', phone: '+1234567890' },
-];
-
 const Body = () => {
 
   const [highlights, setHighlights] = useState([]);
+  const [coordinators, setCoordinators] = useState([]);
 
   
   useEffect(() => {
+
+    // Fetching highlights
     axios.get('http://localhost:5000/highlights')
       .then(response => setHighlights(response.data))
-      .catch(error => console.error(error));
-  }, [highlights]);
+      .catch(error => console.error("Error loading highlights:", error));
+  
+    // Fetching coordinators
+    axios.get('http://localhost:5000/coordinators')
+      .then(response => setCoordinators(response.data)) // Assuming setCoordinators is the state setter for coordinators
+      .catch(error => console.error("Error loading coordinators:", error));
+  }, []);
 
 
   return (

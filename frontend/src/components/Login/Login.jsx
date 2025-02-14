@@ -42,20 +42,22 @@ const googleLogin = async () => {
         const userEmail = result.user.email;
         // console.log("Logged in user email:", userEmail);
 
-        sessionStorage.setItem("userEmail", userEmail);
-
+        
         // Send email to backend for validation & student data
         const response = await axios.get(`http://localhost:5000/student/${userEmail}`);
         const student = response.data; // Backend returns student data
         
-        sessionStorage.setItem("loginStatus", "true"); // Store as string
+           // 🔹 Store login status and role in session storage
+        sessionStorage.setItem("userEmail", userEmail);
+        sessionStorage.setItem("loginStatus", "true");
+        sessionStorage.setItem("role", "Student");
         
 
         toast.success("Logged in successfully!", {
             position: "bottom-center",
             autoClose: 3000,
             theme: "light",
-            transition: Bounce,
+            transition: Bounce,         
         });
 
         // Check if student is registered
@@ -82,6 +84,110 @@ const googleLogin = async () => {
             }
         } else {
             toast.error("Network error. Please check your connection.", { position: "bottom-center", autoClose: 5000, theme: "light", transition: Bounce });
+        }
+    }
+};
+
+
+//WorkingOnThis {currently}
+
+const googleLoginCoordinator = async () => {
+    try {
+
+        // 🔹 Fetch all coordinators from the backend
+        const coordinators = await axios.get("http://localhost:5000/coordinators")
+            .then(res => res.data) // Extract data properly
+            .catch(error => {
+                console.error("Error fetching coordinators:", error);
+                throw new Error("Failed to fetch coordinators");
+            });
+
+        // 🔹 Google Authentication
+        const provider = new GoogleAuthProvider();
+        const auth = getAuth();
+        const result = await signInWithPopup(auth, provider);
+        const userEmail = result.user.email;
+
+        // 🔹 Check if the user is a Placement Coordinator
+        const isCoordinator = coordinators.some(
+            (coordinator) =>
+                coordinator.email === userEmail &&
+                coordinator.role === "Placement Coordinator"
+        );
+
+        if (!isCoordinator) {
+            toast.error("Access Denied! You are not a Placement Coordinator.", {
+                position: "bottom-center",
+                autoClose: 3000,
+                theme: "light",
+                transition: Bounce,
+            });
+            return;
+        }
+
+        // 🔹 Store login status and role
+        // 🔹 Store user email in session storage
+        sessionStorage.setItem("userEmail", userEmail);
+        sessionStorage.setItem("loginStatus", "true");
+        sessionStorage.setItem("role", "PlacementCoordinator");
+
+        // 🔹 Fetch coordinator details from backend
+        const response = await axios.get(`http://localhost:5000/coordinators/${userEmail}`)
+            .then(res => res.data) // Extract data
+            .catch(error => {
+                console.error("Error fetching coordinator details:", error);
+                throw new Error("Failed to fetch coordinator details");
+            });
+
+        console.log("Coordinator Details:", response); // Optional: Log fetched coordinator details
+
+        // 🔹 Show success toast
+        toast.success("Logged in successfully!", {
+            position: "bottom-center",
+            autoClose: 3000,
+            theme: "light",
+            transition: Bounce,
+        });
+
+        // 🔹 Redirect to Coordinator Dashboard
+        navigate("/coordinator-dashboard");
+
+    } catch (error) {
+        console.error("Login Error:", error);
+
+        // 🔹 Handle backend validation errors
+        if (error.response) {
+            const { status, data } = error.response;
+
+            if (status === 403 || status === 400) {
+                toast.error(data.message, {
+                    position: "bottom-center",
+                    autoClose: 5000,
+                    theme: "light",
+                    transition: Bounce
+                });
+            } else if (status === 404) {
+                toast.error("Coordinator not found.", {
+                    position: "bottom-center",
+                    autoClose: 5000,
+                    theme: "light",
+                    transition: Bounce
+                });
+            } else {
+                toast.error("Something went wrong. Please try again.", {
+                    position: "bottom-center",
+                    autoClose: 5000,
+                    theme: "light",
+                    transition: Bounce
+                });
+            }
+        } else {
+            toast.error("Network error. Please check your connection.", {
+                position: "bottom-center",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce
+            });
         }
     }
 };
@@ -195,7 +301,7 @@ const googleLogin = async () => {
                 </CardHeader>
                 <CardContent className="space-y-2">
                 <button
-                        onClick={googleLogin}
+                        onClick={googleLoginCoordinator}
                         className="flex border bg-card text-card-foreground shadow-md gap-[0.7rem] font-sans items-center justify-center text-black p-3 rounded-full w-56 active:transform-scale-105 transition-colors"
                     >
                         <FcGoogle />
