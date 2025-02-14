@@ -102,6 +102,8 @@ const googleLoginCoordinator = async () => {
                 throw new Error("Failed to fetch coordinators");
             });
 
+
+        console.log("HELLODJKSJFKDSJFKL:JDS");
         // 🔹 Google Authentication
         const provider = new GoogleAuthProvider();
         const auth = getAuth();
@@ -131,16 +133,6 @@ const googleLoginCoordinator = async () => {
         sessionStorage.setItem("loginStatus", "true");
         sessionStorage.setItem("role", "PlacementCoordinator");
 
-        // 🔹 Fetch coordinator details from backend
-        const response = await axios.get(`http://localhost:5000/coordinators/${userEmail}`)
-            .then(res => res.data) // Extract data
-            .catch(error => {
-                console.error("Error fetching coordinator details:", error);
-                throw new Error("Failed to fetch coordinator details");
-            });
-
-        console.log("Coordinator Details:", response); // Optional: Log fetched coordinator details
-
         // 🔹 Show success toast
         toast.success("Logged in successfully!", {
             position: "bottom-center",
@@ -150,7 +142,7 @@ const googleLoginCoordinator = async () => {
         });
 
         // 🔹 Redirect to Coordinator Dashboard
-        navigate("/coordinator-dashboard");
+        navigate("/announcements");
 
     } catch (error) {
         console.error("Login Error:", error);
