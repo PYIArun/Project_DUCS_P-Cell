@@ -1,110 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
+  const [announcements, setAnnouncements] = useState([]);
+  const [seeMoreState, setSeeMoreState] = useState({ latest: [] });
 
+  useEffect(() => {
+    axios.get("http://localhost:5000/announcements")
+      .then(response => {
+        console.log(response.data);  // Check if data is coming through
+        setAnnouncements(response.data);
 
-  const content = {
-    latest: [
-      {
-        title: "This is the LATEST tab",
-        content: "Here is the content"
-      },
-      {
-        title: "Another LATEST tab",
-        description: "A different job profile for StrategyCo Global's Business Development Manager is also open for applications.",
-        applicableCourses: [
-          "BBA - Business, ABCUNIVERSITY",
-          "M.Com - Commerce, XYZUNIVERSITY",
-        ],
-        additionalContent: (
-          <p className="mt-2 text-sm">
-            Additional content for this LATEST tab.
-            <br /><br />
-            <strong>Additional Courses:</strong>
-            <ul className="list-disc ml-4">
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-            </ul>
-          </p>
-        ),
-      }
-    ],
-    jobs: [
-      {
-        title: "This is JOBS tab",
-        description: "A different job profile for StrategyCo Global's Business Development Manager is also open for applications.",
-        applicableCourses: [
-          "BBA - Business, ABCUNIVERSITY",
-          "M.Com - Commerce, XYZUNIVERSITY",
-        ],
-        additionalContent: (
-          <p className="mt-2 text-sm">
-            Additional content for this JOBS tab.
-            <br /><br />
-            <strong>Additional Courses:</strong>
-            <ul className="list-disc ml-4">
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-            </ul>
-          </p>
-        ),
-      },
-      {
-        title: "Another JOBS tab",
-        description: "A different job profile for StrategyCo Global's Business Development Manager is also open for applications.",
-        applicableCourses: [
-          "BBA - Business, ABCUNIVERSITY",
-          "M.Com - Commerce, XYZUNIVERSITY",
-        ],
-        additionalContent: (
-          <p className="mt-2 text-sm">
-            Additional content for this JOBS tab.
-            <br /><br />
-            <strong>Additional Courses:</strong>
-            <ul className="list-disc ml-4">
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-            </ul>
-          </p>
-        ),
-      },
-      {
-        title: "Another JOBS tab",
-        description: "A different job profile for StrategyCo Global's Business Development Manager is also open for applications.",
-        applicableCourses: [
-          "BBA - Business, ABCUNIVERSITY",
-          "M.Com - Commerce, XYZUNIVERSITY",
-        ],
-        additionalContent: (
-          <p className="mt-2 text-sm">
-            Additional content for this JOBS tab.
-            <br /><br />
-            <strong>Additional Courses:</strong>
-            <ul className="list-disc ml-4">
-              <li>MSc - Computer Science, DEFUNIVERSITY</li>
-            </ul>
-          </p>
-        ),
-      }
-    ]
-  };
-
-  // State for each item's seeMore
-  const [seeMoreState, setSeeMoreState] = useState({
-    latest: content.latest.map(() => false),  // Default "See More" state is false for all items in the latest tab
-    jobs: content.jobs.map(() => false),      // Default "See More" state is false for all items in the jobs tab
-  });
+        // Initialize seeMoreState for latest
+        setSeeMoreState(prevState => ({
+          ...prevState,
+          latest: response.data.map(() => false)
+        }));
+      })
+      .catch(error => console.error("Error fetching announcements:", error));
+  }, []);
 
   const toggleSeeMore = (tab, index) => {
-    const newSeeMoreState = { ...seeMoreState };
-    newSeeMoreState[tab][index] = !newSeeMoreState[tab][index];  // Toggle seeMore for the specific item in the specified tab
-    setSeeMoreState(newSeeMoreState);
+    setSeeMoreState(prevState => ({
+      ...prevState,
+      [tab]: prevState[tab].map((item, i) => (i === index ? !item : item)),
+    }));
   };
 
+  // Based on the active state, you switch between announcements and jobs
+  const content = active === "latest" ? announcements : [];
+
   return (
-    <div className="font-instrument mb-[4rem] rounded-lg h-[40rem] w-[60rem] mx-auto flex flex-col">
+    <div className="font-instrument my-[4rem] rounded-lg h-screen w-[90rem] mx-auto flex flex-col">
       {/* Buttons at the top */}
       <div className="flex justify-around w-full px-4 gap-x-4 py-4">
         <button
@@ -123,29 +51,29 @@ const StudentHome = () => {
 
       {/* Tab Content Below */}
       <div className="mobile:h-[30rem] bg-[#F8F7F9] w-full rounded-[0.7rem] py-[1rem] mx-auto h-[40rem] overflow-y-scroll">
-        {content[active] && content[active].map((item, index) => (
-          <div key={index} className='w-[90%]  bg-white mx-auto my-[1rem] p-[1rem]'>
-            <div className="font-bold  text-lg">{item.title}</div>
-            <p className="mt-2  text-sm">
-              {item.description}
-              <br /><br />
-              <strong>Applicable Courses:</strong>
-              <ul className="  list-disc ml-4">
-                {item.applicableCourses.map((course, index) => (
-                  <li key={index}>{course}</li>
-                ))}
-              </ul>
-            </p>
+        {content && content.length > 0 && content.map((item, index) => (
+          <div key={index} className='w-[90%] bg-white mx-auto my-[1rem] p-[1rem]'>
+            <div className="font-bold flex justify-between text-lg">
+              <p> {item.title} </p>
+              <p className='text-gray-400 text-sm'>
+                Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
+              </p>
+            </div>
 
-            {/* Conditional render for see more content */}
-            {seeMoreState[active][index] && item.additionalContent}
+            {/* Content Section */}
+            <div
+              className={`mt-2 text-sm transition-all duration-300 overflow-hidden ${
+                seeMoreState.latest[index] ? "max-h-[100%]" : "max-h-[30rem] overflow-hidden"
+              }`}
+              dangerouslySetInnerHTML={{ __html: item.content_of_announcements }}
+            />
 
-            {/* Toggle See More / See Less button */}
+            {/* Toggle Button */}
             <b
-              className="hover:cursor-pointer mt-1 inline-block"
-              onClick={() => toggleSeeMore(active, index)}
+              className="hover:cursor-pointer mt-2 inline-block text-blue-600"
+              onClick={() => toggleSeeMore("latest", index)}
             >
-              {seeMoreState[active][index] ? "See Less ..." : "See More ..."}
+              {seeMoreState.latest[index] ? "See Less ..." : "See More ..."}
             </b>
           </div>
         ))}

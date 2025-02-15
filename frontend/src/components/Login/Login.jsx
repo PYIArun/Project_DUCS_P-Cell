@@ -186,7 +186,7 @@ const googleLoginCoordinator = async () => {
 
     return (
         // 
-        <div className="flex justify-center min-h-[46rem] bg-[#fafafa] ">
+        <div className="flex justify-center min-h-[46.9rem] bg-[#fafafa] ">
 
             <div className="my-[5rem]">
 
@@ -311,22 +311,7 @@ const googleLoginCoordinator = async () => {
 
     
             </div>
-            {/* <div className="text-center p-8 bg-white rounded-lg shadow-md"> */}
-                {/* <div className="mb-4"> */}
-                    {/* <img src={googleIconUrl} alt="Google Logo" className="w-8 h-8 mx-auto mb-4" /> */}
-                    {/* <h2 className="text-2xl font-semibold text-gray-800"></h2> */}
-                {/* </div> */}
-                {/* <div> */}
-                    {/* <button */}
-                        {/* onClick={googleLogin} */}
-                        {/* className="flex items-center justify-center text-black p-3 rounded-full w-56 active:transform-scale-105 transition-colors" */}
-                    {/* > */}
-                        {/* <FcGoogle /> */}
-                        {/* <img src={googleIconUrl} alt="Google" className="w-6 h-6 mr-2" /> */}
-                        {/* Continue with Google */}
-                    {/* </button> */}
-                {/* </div> */}
-            {/* </div> */}
+           
         </div>
     );
 };

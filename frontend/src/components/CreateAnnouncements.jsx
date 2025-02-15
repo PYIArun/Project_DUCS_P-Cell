@@ -76,7 +76,7 @@ const CreateAnnouncement = () => {
 
   return (
     <div>
-      <div className="w-[90%] flex flex-col mb-[4rem] md:flex-row lg:flex-row mx-auto justify-between gap-[4rem]">
+      <div className="w-[90%] flex flex-col my-[4rem] md:flex-row lg:flex-row mx-auto justify-between gap-[4rem]">
         <div className="flex flex-col mt-[2rem] w-full md:w-[40%] gap-[2rem]">
           <CardHeader>
             <CardTitle className="text-[2rem] text-[#72265F] font-instrument">Create Announcement</CardTitle>
