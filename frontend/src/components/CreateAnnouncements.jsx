@@ -48,6 +48,12 @@ const CreateAnnouncement = () => {
   const AnnouncementFormSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    const res = {title: title,
+      content_of_announcements: content,  // Including content here
+      date_of_announcements: dateOfPost,
+      time_of_announcements: timeOfPost
+    };
+    console.log(res);
     try {
       await axios.post('http://localhost:5000/announcements', {
         title: title,
