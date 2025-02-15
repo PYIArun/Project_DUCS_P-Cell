@@ -3,28 +3,12 @@ import React, { useState } from 'react';
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
 
+
   const content = {
     latest: [
       {
         title: "This is the LATEST tab",
-        description: "Applications are now being accepted for StrategyCo Global's Job Profile: Business Development Manager. Eligible students will be able to find this job profile under JOB PROFILES options, and apply.",
-        applicableCourses: [
-          "B.Com (Hons.) - Commerce, HANSRAJCODE",
-          "BA (Hons.) - Economics, HANSRAJCODE",
-          "BA - Arts ((Economics + Commerce)), HANSRAJCODE"
-        ],
-        additionalContent: (
-          <p className="mt-2 text-sm">
-            Additional content goes here for the LATEST tab. You can add as much text as needed for this section.
-            <br /><br />
-            <strong>Additional Courses:</strong>
-            <ul className="list-disc ml-4">
-              <li>BBA - Business, XYZUNIVERSITY</li>
-              <li>MA - Economics, XYZUNIVERSITY</li>
-              <li>MBA - Marketing, XYZUNIVERSITY</li>
-            </ul>
-          </p>
-        ),
+        content: "Here is the content"
       },
       {
         title: "Another LATEST tab",
