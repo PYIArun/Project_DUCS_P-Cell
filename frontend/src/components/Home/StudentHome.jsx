@@ -1,38 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown'
 
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
+  const [content, setContent] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
-  const [seeMoreState, setSeeMoreState] = useState({ latest: [] });
 
   useEffect(() => {
     axios.get("http://localhost:5000/announcements")
       .then(response => {
         console.log(response.data);  // Check if data is coming through
-        setAnnouncements(response.data);
+        setContent(response.data);
 
-        // Initialize seeMoreState for latest
-        setSeeMoreState(prevState => ({
-          ...prevState,
-          latest: response.data.map(() => false)
-        }));
+        // Initialize announcements with preview text and expansion state
+        setAnnouncements(response.data.map(item => ({
+          ...item,
+          previewText: item.content_of_announcements.replace(/<[^>]+>/g, " ").slice(0, 500) + "...",
+          isExpanded: false
+        })));
       })
       .catch(error => console.error("Error fetching announcements:", error));
-  }, []);
+  }, [active]);
 
-  const toggleSeeMore = (tab, index) => {
-    setSeeMoreState(prevState => ({
-      ...prevState,
-      [tab]: prevState[tab].map((item, i) => (i === index ? !item : item)),
-    }));
+
+
+  // Toggle function to expand/collapse content
+  const toggleExpand = (index) => {
+    setAnnouncements((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, isExpanded: !item.isExpanded } : item
+      )
+    );
   };
 
-  // Based on the active state, you switch between announcements and jobs
-  const content = active === "latest" ? announcements : [];
-
   return (
-    <div className="font-instrument my-[4rem] rounded-lg h-screen w-[90rem] mx-auto flex flex-col">
+    <div className="font-instrument my-[4rem] rounded-lg h-screen w-[70rem] mx-auto flex flex-col">
       {/* Buttons at the top */}
       <div className="flex justify-around w-full px-4 gap-x-4 py-4">
         <button
@@ -51,30 +54,38 @@ const StudentHome = () => {
 
       {/* Tab Content Below */}
       <div className="mobile:h-[30rem] bg-[#F8F7F9] w-full rounded-[0.7rem] py-[1rem] mx-auto h-[40rem] overflow-y-scroll">
-        {content && content.length > 0 && content.map((item, index) => (
+        {active == "latest" && announcements.map((item, index) => (
+          <div key={index} className='w-[90%] bg-white mx-auto my-[1rem] p-[1rem]'>
+            <div className="font-bold justify-between text-lg">
+              <div className='flex items-center my-[1rem]'>
+                <p className='text-3xl'> {item.title} </p>
+                <p className='text-gray-400 block text-sm ml-auto'>
+                  Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
+                </p>
+              </div>
+              <p className='font-thin' dangerouslySetInnerHTML={{ __html: item.isExpanded ? item.content_of_announcements : item.previewText }} />
+              <button
+                onClick={() => toggleExpand(index)}
+                className="text-blue-500 mt-2 font-medium hover:underline"
+              >
+                {item.isExpanded ? "See Less" : "See More"}
+              </button>
+            </div>
+
+
+          </div>
+        ))}
+        {active == "jobs" && content.map((item, index) => (
           <div key={index} className='w-[90%] bg-white mx-auto my-[1rem] p-[1rem]'>
             <div className="font-bold flex justify-between text-lg">
               <p> {item.title} </p>
               <p className='text-gray-400 text-sm'>
                 Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
               </p>
+
             </div>
 
-            {/* Content Section */}
-            <div
-              className={`mt-2 text-sm transition-all duration-300 overflow-hidden ${
-                seeMoreState.latest[index] ? "max-h-[100%]" : "max-h-[30rem] overflow-hidden"
-              }`}
-              dangerouslySetInnerHTML={{ __html: item.content_of_announcements }}
-            />
 
-            {/* Toggle Button */}
-            <b
-              className="hover:cursor-pointer mt-2 inline-block text-blue-600"
-              onClick={() => toggleSeeMore("latest", index)}
-            >
-              {seeMoreState.latest[index] ? "See Less ..." : "See More ..."}
-            </b>
           </div>
         ))}
       </div>

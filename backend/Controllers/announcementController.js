@@ -12,7 +12,8 @@ const createAnnouncement = async (req, res) => {
 
 const getAllAnnouncements = async (req, res) => {
   try {
-    const announcements = await Announcement.find();
+    const announcements = await Announcement.find()
+    .sort({ date_of_announcements: -1, time_of_announcements: -1 });
     res.status(200).json(announcements);
   } catch (error) {
     res.status(400).json({ message: error.message });

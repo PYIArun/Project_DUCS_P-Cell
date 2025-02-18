@@ -11,7 +11,8 @@ const createHighlight = async (req, res) => {
 };
 const getAllHighlights = async (req, res) => {
   try {
-    const highlights = await Highlight.find();
+    const highlights = await Highlight.find()
+      .sort({date_of_post : -1});
     res.status(200).json(highlights);
   } catch (error) {
     res.status(400).json({ message: error.message });
