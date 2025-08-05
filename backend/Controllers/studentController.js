@@ -1,6 +1,6 @@
-const Student = require('../Models/Student');
+import Student from "../Models/Student.js";
 
-const registerStudent = async (req, res) => {
+export const registerStudent = async (req, res) => {
   try {
     const { 
       email, collegeRollNo, name, mobileNo, course, dob, gender, 
@@ -57,7 +57,7 @@ const registerStudent = async (req, res) => {
 };
 
 
-const getStudentByEmail = async (req, res) => {
+export const getStudentByEmail = async (req, res) => {
   try {
     const { email } = req.params;
 
@@ -100,5 +100,3 @@ const getStudentByEmail = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
-module.exports = {registerStudent, getStudentByEmail};

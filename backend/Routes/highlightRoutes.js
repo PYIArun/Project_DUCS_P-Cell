@@ -1,5 +1,5 @@
-const express = require('express');
-const { createHighlight, getAllHighlights, getHighlightById, updateHighlight, deleteHighlight } = require('../Controllers/highlightController');
+import express from 'express';
+import { createHighlight, getAllHighlights, getHighlightById, updateHighlight, deleteHighlight } from '../Controllers/highlightController.js';
 
 const router = express.Router();
 
@@ -9,4 +9,4 @@ router.get('/highlights/:id', getHighlightById);
 router.put('/highlights/:id', updateHighlight);
 router.delete('/highlights/:id', deleteHighlight);
 
-module.exports = router;
+export default router;

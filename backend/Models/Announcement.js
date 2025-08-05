@@ -1,10 +1,19 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const AnnoucementSchema = new mongoose.Schema({
+const AnnouncementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content_of_announcements: { type: String, required: true },
-  date_of_announcements: { type: String, required: true, default: Date.now },
-  time_of_announcements: { type: String, required: true, default: () => new Date().toLocaleTimeString() } // Fixed semicolon to comma
+  date_of_announcements: {
+    type: String,
+    required: true,
+    default: () => new Date().toISOString().split('T')[0] // Formats as YYYY-MM-DD
+  },
+  time_of_announcements: {
+    type: String,
+    required: true,
+    default: () => new Date().toLocaleTimeString()
+  }
 });
 
-module.exports = mongoose.model('Annoucement', AnnoucementSchema);
+const Announcement = mongoose.model('Announcement', AnnouncementSchema);
+export default Announcement;

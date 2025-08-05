@@ -1,6 +1,6 @@
-const Announcement = require('../Models/Announcement'); // Make sure the path is correct
+import Announcement from '../Models/Announcement.js';
 
-const createAnnouncement = async (req, res) => {
+export const createAnnouncement = async (req, res) => {
   try {
     const newAnnouncement = new Announcement(req.body);
     await newAnnouncement.save();
@@ -10,17 +10,17 @@ const createAnnouncement = async (req, res) => {
   }
 };
 
-const getAllAnnouncements = async (req, res) => {
+export const getAllAnnouncements = async (req, res) => {
   try {
     const announcements = await Announcement.find()
-    .sort({ date_of_announcements: -1, time_of_announcements: -1 });
+      .sort({ date_of_announcements: -1, time_of_announcements: -1 });
     res.status(200).json(announcements);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-const getAnnouncementById = async (req, res) => {
+export const getAnnouncementById = async (req, res) => {
   try {
     const announcement = await Announcement.findById(req.params.id);
     if (!announcement) return res.status(404).json({ message: 'Announcement not found' });
@@ -30,7 +30,7 @@ const getAnnouncementById = async (req, res) => {
   }
 };
 
-const updateAnnouncement = async (req, res) => {
+export const updateAnnouncement = async (req, res) => {
   try {
     const updatedAnnouncement = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedAnnouncement) return res.status(404).json({ message: 'Announcement not found' });
@@ -40,7 +40,7 @@ const updateAnnouncement = async (req, res) => {
   }
 };
 
-const deleteAnnouncement = async (req, res) => {
+export const deleteAnnouncement = async (req, res) => {
   try {
     const deletedAnnouncement = await Announcement.findByIdAndDelete(req.params.id);
     if (!deletedAnnouncement) return res.status(404).json({ message: 'Announcement not found' });
@@ -48,12 +48,4 @@ const deleteAnnouncement = async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-};
-
-module.exports = {
-  createAnnouncement,
-  getAllAnnouncements,
-  getAnnouncementById,
-  updateAnnouncement,
-  deleteAnnouncement
 };

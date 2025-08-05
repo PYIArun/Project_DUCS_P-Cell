@@ -1,11 +1,11 @@
-const express = require("express");
-const {
+import express from "express";
+import {
     getAllCoordinators,
     getCoordinatorByEmail,
     addCoordinator,
     updateCoordinator,
     deleteCoordinator
-} = require("../Controllers/coordinatorController"); 
+} from "../Controllers/coordinatorController.js"; 
 
 
 const router = express.Router();
@@ -25,4 +25,4 @@ router.put("/:email", updateCoordinator);
 // 🔹 DELETE a coordinator by email
 router.delete("/:email", deleteCoordinator);
 
-module.exports = router;
+export default router;

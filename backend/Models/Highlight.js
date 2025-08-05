@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const HighlightSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -6,4 +6,5 @@ const HighlightSchema = new mongoose.Schema({
   gdrive_link: { type: String, required: false }
 });
 
-module.exports = mongoose.model('Highlight', HighlightSchema);
+const Highlight = mongoose.model('Highlight', HighlightSchema);
+export default Highlight;
