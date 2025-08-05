@@ -11,6 +11,7 @@ import CompanyListing from './components/CompanyListing.jsx';
 import EditProfile from './components/EditProfile.jsx';
 import CreateAnnouncement from './components/CreateAnnouncements.jsx';
 import StudentHome from './components/Home/StudentHome.jsx';
+import PlacementPolicy from './components/PlacementPolicy.jsx';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/studentHome" element={<StudentHome />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/announcements" element={<CreateAnnouncement />} />
+        <Route path="/placement-policy" element={<PlacementPolicy />} />
       </Routes>
       <Footer/>
     </>
