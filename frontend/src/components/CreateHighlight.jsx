@@ -3,7 +3,6 @@ import { Button } from './ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,

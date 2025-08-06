@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown';
 
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
@@ -10,24 +10,17 @@ const StudentHome = () => {
   useEffect(() => {
     axios.get("http://localhost:5000/announcements")
       .then(response => {
-        console.log(response.data);  // Check if data is coming through
         setContent(response.data);
-
-        // Initialize announcements with preview text and expansion state
         setAnnouncements(response.data.map(item => ({
           ...item,
-          previewText: item.content_of_announcements.replace(/<[^>]+>/g, " ").slice(0, 500) + "...",
           isExpanded: false
         })));
       })
       .catch(error => console.error("Error fetching announcements:", error));
   }, [active]);
 
-
-
-  // Toggle function to expand/collapse content
   const toggleExpand = (index) => {
-    setAnnouncements((prev) =>
+    setAnnouncements(prev =>
       prev.map((item, i) =>
         i === index ? { ...item, isExpanded: !item.isExpanded } : item
       )
@@ -35,57 +28,85 @@ const StudentHome = () => {
   };
 
   return (
-    <div className="font-instrument my-[4rem] rounded-lg h-screen w-[70rem] mx-auto flex flex-col">
-      {/* Buttons at the top */}
-      <div className="flex justify-around w-full px-4 gap-x-4 py-4">
+    <div className="font-instrument min-h-screen my-16 rounded-lg w-full max-w-[70rem] mx-auto flex flex-col">
+      {/* Toggle Buttons */}
+      <div className="flex justify-around px-4 gap-x-4 py-4">
         <button
           onClick={() => setActive("latest")}
-          className={`w-[50%] py-[0.5rem] rounded-full border-black transition-all duration-300 ${active === "latest" ? "bg-[#F8F7F9]" : ""}`}
+          className={`w-1/2 py-2 rounded-full border border-black transition-all duration-300 ${active === "latest" ? "bg-[#F8F7F9]" : ""}`}
         >
           Latest
         </button>
         <button
           onClick={() => setActive("jobs")}
-          className={`w-[50%] py-[0.5rem] rounded-full border-black transition-all duration-300 ${active === "jobs" ? "bg-[#F8F7F9]" : ""}`}
+          className={`w-1/2 py-2 rounded-full border border-black transition-all duration-300 ${active === "jobs" ? "bg-[#F8F7F9]" : ""}`}
         >
           Jobs
         </button>
       </div>
 
-      {/* Tab Content Below */}
-      <div className="mobile:h-[30rem] bg-[#F8F7F9] w-full rounded-[0.7rem] py-[1rem] mx-auto h-[40rem] overflow-y-scroll">
-        {active == "latest" && announcements.map((item, index) => (
-          <div key={index} className='w-[90%] bg-white mx-auto my-[1rem] p-[1rem]'>
-            <div className="font-bold justify-between text-lg">
-              <div className='flex items-center my-[1rem]'>
-                <p className='text-3xl'> {item.title} </p>
-                <p className='text-gray-400 block text-sm ml-auto'>
-                  Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
-                </p>
-              </div>
-              <p className='font-thin' dangerouslySetInnerHTML={{ __html: item.isExpanded ? item.content_of_announcements : item.previewText }} />
-              <button
-                onClick={() => toggleExpand(index)}
-                className="text-blue-500 mt-2 font-medium hover:underline"
-              >
-                {item.isExpanded ? "See Less" : "See More"}
-              </button>
-            </div>
-
-
-          </div>
-        ))}
-        {active == "jobs" && content.map((item, index) => (
-          <div key={index} className='w-[90%] bg-white mx-auto my-[1rem] p-[1rem]'>
-            <div className="font-bold flex justify-between text-lg">
-              <p> {item.title} </p>
-              <p className='text-gray-400 text-sm'>
+      {/* Content Container */}
+      <div className="bg-[#F8F7F9] w-full rounded-xl py-4 px-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+        {active === "latest" && announcements.map((item, index) => (
+          <div
+            key={index}
+            className="w-full bg-white mb-4 p-4 rounded-lg shadow-sm overflow-hidden break-words"
+          >
+            <div className="flex items-center mb-2">
+              <p className="text-xl font-semibold">{item.title}</p>
+              <p className="text-gray-400 text-sm ml-auto text-right">
                 Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
               </p>
-
             </div>
 
+            <div
+              className={`text-sm leading-6 transition-all duration-300 whitespace-pre-wrap break-words overflow-x-hidden ${item.isExpanded ? '' : 'line-clamp-6'}`}
+            >
+              <ReactMarkdown
+                components={{
+                  code({ node, inline, className, children, ...props }) {
+                    return (
+                      <code
+                        className={`text-sm break-words ${inline ? '' : 'block p-2 bg-gray-100 rounded'}`}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    );
+                  },
+                  table({ children }) {
+                    return (
+                      <div className="overflow-x-auto w-full">
+                        <table className="table-auto w-full">{children}</table>
+                      </div>
+                    );
+                  },
+                }}
+              >
+                {item.content_of_announcements}
+              </ReactMarkdown>
+            </div>
 
+            <button
+              onClick={() => toggleExpand(index)}
+              className="text-blue-500 mt-2 font-medium hover:underline"
+            >
+              {item.isExpanded ? "See Less" : "See More"}
+            </button>
+          </div>
+        ))}
+
+        {active === "jobs" && content.map((item, index) => (
+          <div
+            key={index}
+            className="w-full bg-white mb-4 p-4 rounded-lg shadow-sm overflow-hidden break-words"
+          >
+            <div className="flex items-center mb-2">
+              <p className="text-xl font-semibold">{item.title}</p>
+              <p className="text-gray-400 text-sm ml-auto text-right">
+                Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
+              </p>
+            </div>
           </div>
         ))}
       </div>

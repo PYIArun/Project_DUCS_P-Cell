@@ -1,261 +1,270 @@
-  import React, { useState } from 'react';
-  import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card";
-  import { Input } from "@/components/ui/input";
-  import { Label } from "@/components/ui/label";
-  import { Button } from "@/components/ui/button";
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-  import { toast } from "react-toastify";
-  import "react-toastify/dist/ReactToastify.css";
-  import axios from 'axios';
+"use client";
 
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import axios from "axios";
 
-  const Register = () => {
-    const [formData, setFormData] = useState({
-      collegeRollNo: "",
-      name: "",
-      mobileNo: "",
-      course: "",
-      dob: "",
-      gender: "",
-      tenthValue: "",
-      tenthType: "CGPA",
-      twelfthValue: "",
-      twelfthType: "CGPA",
-      ugPercentage: "",
-      ugCGPA: "",
-      pgPercentage: "",
-      pgCGPA: "",
-      backlogs: "",
-    });
-    
-    // Handle Input Change
-    const handleChange = (e) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+export default function RegistrationPage() {
+  const [step, setStep] = useState(1);
 
-    // Handle Selection Change
-    const handleSelectChange = (name, value) => {
-      setFormData({ ...formData, [name]: value });
-    };
+  const [formData, setFormData] = useState({
+    email: "",
+    name: "",
+    alternateEmail: "",
+    correspondenceAddress: "",
+    permanentAddress: "",
+    phoneNumber: "",
+    alternatePhoneNumber: "",
+    dob: "",
+    gender: "",
+    course: "",
+    classRollNumber: "",
+    examRollNumberUG: "",
+    sgpa: "",
+    numBacklogs: "",
+    backlogDetails: "",
+    collegeName: "",
+    university: "",
+    examRollNumberPG: "",
+    cgpa: "",
+    yearOfPassingPG: "",
+    board12: "",
+    examRollNumber12: "",
+    percentage12: "",
+    yearOfPassing12: "",
+    board10: "",
+    examRollNumber10: "",
+    percentage10: "",
+    yearOfPassing10: "",
+    resumeLink: "",
+    marksheetDriveLink: "",
+    placementConsent: false,
+  });
 
-    // Validation Function
-    const validateForm = () => {
-      const { collegeRollNo, name, mobileNo, course, dob, gender, tenthValue, twelfthValue, ugPercentage, ugCGPA, pgPercentage, pgCGPA, backlogs } = formData;
-
-      if (!collegeRollNo || !name || !mobileNo || !course || !dob || !gender) {
-        toast.error("All fields are required!");
-        return false;
-      }
-
-          // Validate Mobile Number (Must be 10 digits)
-      if (!/^\d{10}$/.test(mobileNo)) {
-          toast.error("Mobile number must be exactly 10 digits!");
-          return false;
-      }
-
-      // Validate DOB (Must be at least 18 years old)
-      const birthDate = new Date(dob);
-      const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      if (isNaN(birthDate.getTime()) || age < 18 || age > 80) {
-        toast.error("Age must be between 18 and 80!");
-        return false;
-      }
-      
-
-      // Validate CGPA and Percentage fields
-      if (tenthValue <= 0 || twelfthValue <= 0 || ugPercentage < 0 || ugCGPA < 0 || pgPercentage < 0 || pgCGPA < 0) {
-        toast.error("CGPA and Percentage values must be positive!");
-        return false;
-      }
-
-      // Validate Backlogs (Must be positive)
-      if (backlogs < 0) {
-        toast.error("Backlogs cannot be negative!");
-        return false;
-      }
-
-      return true;
-    };
-
-    // Handle Form Submission
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-    
-      if (validateForm()) {
-        try {
-          const userEmail = sessionStorage.getItem("userEmail");
-    
-          if (!userEmail) {
-            toast.error("User email not found. Please log in again.");
-            return;
-          }
-    
-          const response = await axios.post(`http://localhost:5000/student/register`, {
-            ...formData,
-            email: userEmail,
-          });
-    
-          toast.success(response.data.message || "Registration Successful!");
-          console.log("Form Submitted:", formData);
-          
-        } catch (error) {
-          toast.error(error.response?.data?.message || "Registration Failed!");
-          console.error("Error:", error);
-        }
-      }
-    };
-
-    
-    return (
-      <div className="flex justify-center min-h-[46rem] bg-[#fafafa]">
-        <div className="my-[5rem] w-[50rem] mobile:w-[25rem]">
-          <Card className='bg-white rounded-[0.7rem] py-[1.5rem]'>
-            <CardHeader>
-              <CardTitle>Register for the Placement Session </CardTitle>
-              <CardDescription>Make sure to fill your correct details. </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <Label htmlFor="collegeRollNo">College Roll No</Label>
-                <Input placeholder='Enter your college roll no' id="collegeRollNo" name="collegeRollNo" value={formData.collegeRollNo} onChange={handleChange} required />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="name">Name</Label>
-                <Input placeholder='Enter your name' id="name" name="name" value={formData.name} onChange={handleChange} required />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="mobileNo">Mobile No.</Label>
-                <Input placeholder='Enter your mobile No' id="mobileNo" name="mobileNo" type="number" value={formData.mobileNo} onChange={handleChange} required />
-              </div>
-
-              
-              <div className="space-y-1">
-                <Label htmlFor="course">Course</Label>
-                <Select className='' onValueChange={(value) => handleSelectChange("course", value)}>
-                  <SelectTrigger className='text-opacity-60 rounded-[0.4rem]'>
-                    <SelectValue placeholder="Select Course" />
-                  </SelectTrigger>
-                  
-                  <SelectContent className='top-full left-0 w-full bg-white shadow-lg border rounded-md z-50"' >
-                    <SelectItem value="MSC">Master of Computer Science</SelectItem>
-                    <SelectItem value="MCA">Master of Computer Applications</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="dob">Date of Birth</Label>
-                <Input id="dob" name="dob" type="date" value={formData.dob} onChange={handleChange} required />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="gender">Gender</Label>
-                <Select   onValueChange={(value) => handleSelectChange("gender", value)}>
-                  <SelectTrigger className='text-opacity-60 rounded-[0.4rem]'>
-                    <SelectValue placeholder="Select Gender" />
-                  </SelectTrigger>
-                  <SelectContent className='top-full left-0 w-full bg-white shadow-lg border rounded-md z-50'>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Tenth & Twelfth Details */}
-              <div className="space-y-1">
-                <Label>10th Details</Label>
-                <div className="flex space-x-2">
-                  <Input name="tenthValue" type="number" value={formData.tenthValue} onChange={handleChange} placeholder="Enter Value" />
-                  <Select onValueChange={(value) => handleSelectChange("tenthType", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="CGPA/Percentage" />
-                    </SelectTrigger>
-                    <SelectContent className='top-full left-0 w-full bg-white shadow-lg border rounded-md z-50'>
-                      <SelectItem value="CGPA">CGPA</SelectItem>
-                      <SelectItem value="Percentage">Percentage</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label>12th Details</Label>
-                <div className="flex space-x-2">
-                  <Input name="twelfthValue" type="number" value={formData.twelfthValue} onChange={handleChange} placeholder="Enter Value" />
-                  <Select onValueChange={(value) => handleSelectChange("twelfthType", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="CGPA/Percentage" />
-                    </SelectTrigger>
-                    <SelectContent className='top-full left-0 w-full bg-white shadow-lg border rounded-md z-50'>
-                      <SelectItem value="CGPA">CGPA</SelectItem>
-                      <SelectItem value="Percentage">Percentage</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* UG & PG Details */}
-              <div className="space-y-1">
-                <Label>UG Details</Label>
-                <div className="flex space-x-2">
-                  <Input name="ugPercentage" type="number" value={formData.ugPercentage} onChange={handleChange} placeholder="Percentage" />
-                  <Input name="ugCGPA" type="number" value={formData.ugCGPA} onChange={handleChange} placeholder="CGPA" />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label>PG Details</Label>
-                <div className="flex space-x-2">
-                  <Input name="pgPercentage" type="number" value={formData.pgPercentage} onChange={handleChange} placeholder="Percentage" />
-                  <Input name="pgCGPA" type="number" value={formData.pgCGPA} onChange={handleChange} placeholder="CGPA" />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label>Number of Backlogs</Label>
-                <Input name="backlogs" type="number" value={formData.backlogs} onChange={handleChange} placeholder="Enter Value" />
-              </div>
-            </CardContent>
-
-            <CardFooter className='flex justify-center'>
-                  <Button onClick={handleSubmit} className='select-none font-instrument px-[1.25rem] py-[0.5rem] bg-[#72265F] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold text-white rounded-[0.5rem]'>Submit Details</Button>
-            </CardFooter>
-
-            <CardDescription className="text-center text-sm mt-2">
-              * Please convert CGPA & Percentage according to your university formula.
-            </CardDescription>
-          </Card>
-        </div>
-
-            {/* {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-xl font-bold mb-4 text-[#72265F]">Are you sure all details are correct?</h2>
-              <div className="flex justify-center font-instrument gap-4">
-                <Button onClick={confirmSubmission} className='rounded-[0.7rem] hover:bg-red-600 hover:text-white active:scale-105 transition-all ease-in' variant="outline">
-                  Yes
-                </Button>
-                <Button onClick={() => setShowModal(false)} className="rounded-[0.7rem] active:scale-105 transition-all ease-in">
-                  No
-                </Button>
-              </div>
-            </div>
-          </div>
-        )} */}
-
-      </div>
-    );
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  export default Register;
+  const validateForm = () => {
+    if (!formData.placementConsent) {
+      toast.error("Please accept the placement policy to continue.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      await axios.post("http://localhost:5000/student/register", formData);
+      toast.success("Registration Successful!");
+    } catch (error) {
+      toast.error("Registration Failed!");
+    }
+  };
+
+  const labelClass = "text-sm font-medium";
+  const inputClass = "opacity-90";
+
+  return (
+    <div className="w-full min-h-screen flex justify-center items-start bg-gray-100 p-4">
+      <div className="w-full max-w-6xl bg-white shadow-xl rounded-xl p-8 space-y-6 overflow-y-auto h-[90vh]">
+        {step === 1 && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Student Registration - Step 1</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Personal Information */}
+              <div>
+                <Label className={labelClass}>Email Address</Label>
+                <Input name="email" placeholder="e.g. example@college.edu" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Name</Label>
+                <Input name="name" placeholder="Full Name" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Alternate Email</Label>
+                <Input name="alternateEmail" placeholder="e.g. alt.email@gmail.com" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Correspondence Address</Label>
+                <Input name="correspondenceAddress" placeholder="Current Address" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Permanent Address</Label>
+                <Input name="permanentAddress" placeholder="Home Address" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Phone Number</Label>
+                <Input name="phoneNumber" placeholder="10-digit mobile" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Alternative Phone Number</Label>
+                <Input name="alternatePhoneNumber" placeholder="Optional mobile" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Date of Birth</Label>
+                <Input type="date" name="dob" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Gender</Label>
+                <Input name="gender" placeholder="Male / Female / Other" className={inputClass} onChange={handleChange} />
+              </div>
+
+              {/* Academic Info - UG */}
+              <div>
+                <Label className={labelClass}>Course</Label>
+                <Input name="course" placeholder="e.g. B.Tech CSE" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Class Roll Number</Label>
+                <Input name="classRollNumber" placeholder="e.g. 22CS10001" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Examination Roll Number (UG)</Label>
+                <Input name="examRollNumberUG" placeholder="University Roll" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>SGPA</Label>
+                <Input name="sgpa" placeholder="Semester GPA" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Number of Backlogs</Label>
+                <Input name="numBacklogs" placeholder="e.g. 0 / 1 / 2" className={inputClass} onChange={handleChange} />
+              </div>
+              <div className="md:col-span-2">
+                <Label className={labelClass}>Details of Backlogs</Label>
+                <Input name="backlogDetails" placeholder="Mention subjects, if any" className={inputClass} onChange={handleChange} />
+              </div>
+
+              {/* PG */}
+              <div>
+                <Label className={labelClass}>College Name</Label>
+                <Input name="collegeName" placeholder="Current college name" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>University</Label>
+                <Input name="university" placeholder="University name" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Examination Roll Number (PG)</Label>
+                <Input name="examRollNumberPG" placeholder="PG Roll Number" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>CGPA</Label>
+                <Input name="cgpa" placeholder="Overall CGPA" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Year of Passing (PG)</Label>
+                <Input name="yearOfPassingPG" placeholder="YYYY" className={inputClass} onChange={handleChange} />
+              </div>
+
+              {/* 12th */}
+              <div>
+                <Label className={labelClass}>12th Board Name</Label>
+                <Input name="board12" placeholder="CBSE / ISC / etc" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>12th Roll Number</Label>
+                <Input name="examRollNumber12" placeholder="Exam Roll No" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>12th Percentage / CGPA</Label>
+                <Input name="percentage12" placeholder="%" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Year of Passing (12th)</Label>
+                <Input name="yearOfPassing12" placeholder="YYYY" className={inputClass} onChange={handleChange} />
+              </div>
+
+              {/* 10th */}
+              <div>
+                <Label className={labelClass}>10th Board Name</Label>
+                <Input name="board10" placeholder="CBSE / State Board" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>10th Roll Number</Label>
+                <Input name="examRollNumber10" placeholder="Exam Roll No" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>10th Percentage / CGPA</Label>
+                <Input name="percentage10" placeholder="%" className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Year of Passing (10th)</Label>
+                <Input name="yearOfPassing10" placeholder="YYYY" className={inputClass} onChange={handleChange} />
+              </div>
+
+              {/* Resume & Marksheets */}
+              <div>
+                <Label className={labelClass}>Resume Google Drive Link</Label>
+                <Input name="resumeLink" placeholder="https://drive.google.com/..." className={inputClass} onChange={handleChange} />
+              </div>
+              <div>
+                <Label className={labelClass}>Marksheets Google Drive Folder</Label>
+                <Input name="marksheetDriveLink" placeholder="PG, UG, 12th, 10th marksheets link" className={inputClass} onChange={handleChange} />
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <Button onClick={() => setStep(2)}>Next</Button>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Step 2 – Placement Policy Consent</h2>
+
+            <p className="text-sm leading-6">
+              In order to participate in the placement activities, you are kindly requested to carefully read and acknowledge the{" "}
+              <a
+                className="underline text-blue-600"
+                href="https://your-placement-policy-link.com"
+                target="_blank"
+              >
+                Placement Policy 2025–26
+              </a>
+              .
+            </p>
+
+            <p className="text-sm leading-6 mt-4">
+              I have read and understood all the points mentioned in the Placement Policy, and I agree to adhere to it throughout the Placement Session
+              2025–26. If I fail to comply with any of the clauses stated in the policy, I understand that I will be solely responsible for the consequences
+              and agree to accept the decision of the Placement Team and the Placement Advisor as final and binding.
+            </p>
+
+            <div className="mt-4">
+              <input
+                type="checkbox"
+                name="placementConsent"
+                checked={formData.placementConsent}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              <label htmlFor="placementConsent" className="text-sm">
+                I agree to the Placement Policy 2025–26
+              </label>
+            </div>
+
+            <div className="pt-6 flex gap-4">
+              <Button variant="outline" onClick={() => setStep(1)}>
+                Back
+              </Button>
+              <Button onClick={handleSubmit}>Submit Registration</Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

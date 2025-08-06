@@ -290,74 +290,60 @@ const Body = () => {
 
 
       {/* Footer Section */}
-      <div className="mt-[5rem] w-[100%] bg-white p-[1.5rem]">
-          
-          <div className="flex justify-center">
+      <div className="w-full bg-white py-[2rem] px-[1.5rem]">
+      <div className="flex justify-center">
+        <div className="flex w-[90%] mx-auto mobile:flex-col">
 
-          <div className="flex w-[90%] mx-auto mobile:flex-col">
-
+          {/* Left - Logo & Address */}
           <div className="flex flex-col gap-[0.7rem]">
-
             <div className="flex items-center gap-[0.7rem]">
-            <img src="./images/du_logo.png" className="w-[15%] mobile:w-[20%]" alt="" />
-              <div className=" flex flex-col gap-[0rem]">
-              <h2 className="font-semibold text-[1.3rem]  mobile:text-[0.9rem] text-[#642A7C]"> Department of Computer Science</h2>
-              <h2 className="font-medium text-[0.9rem] mobile:text-[0.7rem] "> University of Delhi</h2>
+              <img src="./images/du_logo.png" className="w-[15%] mobile:w-[20%]" alt="" />
+              <div className="flex flex-col gap-0">
+                <h2 className="font-semibold text-[1.3rem] mobile:text-[0.9rem] text-[#642A7C]">Department of Computer Science</h2>
+                <h2 className="font-medium text-[0.9rem] mobile:text-[0.7rem]">University of Delhi</h2>
               </div>
             </div>
-          
             <div className="flex flex-col gap-[0.2rem] font-medium pl-[1rem] pt-[0.5rem] opacity-80 mobile:text-[0.8rem]">
               <h2>First Floor, Faculty of Mathematical Sciences</h2>
-              <h2>Room No . 113, Opposite Daulat Ram College, </h2>
-              <h2>University of, Delhi, 110007</h2>
+              <h2>Room No. 113, Opposite Daulat Ram College</h2>
+              <h2>University of Delhi, 110007</h2>
             </div>
-
           </div>
-          
+
+          {/* Middle - Map */}
           <div className="w-[60%] h-[200px] mobile:w-[120%] mobile:pl-[1.1rem] mobile:mt-[1rem]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.0532830263664!2d77.20445207618805!3d28.688052675634548!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd928daadb91%3A0x76aa925fc6e58347!2sDepartment%20of%20Computer%20Science%2C%20University%20of%20Delhi!5e0!3m2!1sen!2sin!4v1738762691191!5m2!1sen!2sin"
-              width="100%" 
-              height="100%" 
-              style={{ border: 0 }} 
-              allowFullScreen="" 
+              src="https://www.google.com/maps/embed?pb=..."
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="University of Delhi Map"
             ></iframe>
           </div>
 
-            
-          </div>
-
+          {/* Right - Contact Us */}
           <div className="flex flex-col w-[20%]">
             <div className="flex justify-end">
-            <h2 className="font-semibold lg:text-[1.3rem] md:text-[1.4rem] sm:text-[1rem] text-[#642A7C] ">Contact Us</h2>
+              <h2 className="font-semibold lg:text-[1.3rem] md:text-[1.4rem] sm:text-[1rem] text-[#642A7C]">Contact Us</h2>
             </div>
-            
-
             <div className="flex justify-end mt-[1rem]">
-            <a className="flex gap-[0.5rem]" href="https://mail.google.com/mail/?view=cm&fs=1&to=placements@cs.du.ac.in" target="_blank">
-            <h2 className="hidden sm:hidden md:hidden lg:block   cursor-pointer">placements@cs.du.ac.in</h2>
-            <Mail className="text-[0.5rem] "/> 
-            </a>  
+              <a className="flex gap-[0.5rem]" href="mailto:placements@cs.du.ac.in" target="_blank" rel="noopener noreferrer">
+                <h2 className="hidden lg:block cursor-pointer">placements@cs.du.ac.in</h2>
+                <Mail className="text-[0.5rem]" />
+              </a>
             </div>
-
-            
-            <div className="flex  justify-end">
-            <a className="flex gap-[0.5rem]" href="https://www.linkedin.com/in/ducs-placement/" target="_blank">
-            <h2 className="hidden sm:hidden md:hidden lg:block  cursor-pointer">ducs-placement</h2>
-            <FaLinkedin className="text-[1.5rem]"/>
-            </a>
+            <div className="flex justify-end">
+              <a className="flex gap-[0.5rem]" href="https://www.linkedin.com/in/ducs-placement/" target="_blank" rel="noopener noreferrer">
+                <h2 className="hidden lg:block cursor-pointer">ducs-placement</h2>
+                <FaLinkedin className="text-[1.5rem]" />
+              </a>
             </div>
-    
-
-            
-
           </div>
-
-          </div>
-          
+        </div>
+      </div>
     </div>
 
     </div>

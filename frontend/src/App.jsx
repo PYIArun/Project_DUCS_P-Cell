@@ -11,6 +11,11 @@ import CompanyListing from './components/CompanyListing.jsx';
 import EditProfile from './components/EditProfile.jsx';
 import CreateAnnouncement from './components/CreateAnnouncements.jsx';
 import StudentHome from './components/Home/StudentHome.jsx';
+<<<<<<< HEAD
+import CreateCompanyForm from './components/Company/CreateCompany.jsx';
+=======
+import PlacementPolicy from './components/PlacementPolicy.jsx';
+>>>>>>> f3e91e3883e5789273761467d6761cd6e7b2a286
 
 export default function App() {
   return (
@@ -35,9 +40,11 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/companylistings" element={<CompanyListing />} />
+        <Route path="/company" element={<CreateCompanyForm />} />
         <Route path="/studentHome" element={<StudentHome />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/announcements" element={<CreateAnnouncement />} />
+        <Route path="/placement-policy" element={<PlacementPolicy />} />
       </Routes>
       <Footer/>
     </>
