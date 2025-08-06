@@ -11,7 +11,8 @@ import CompanyListing from './components/CompanyListing.jsx';
 import EditProfile from './components/EditProfile.jsx';
 import CreateAnnouncement from './components/CreateAnnouncements.jsx';
 import StudentHome from './components/Home/StudentHome.jsx';
-
+import CreateCompanyForm from './components/Company/CreateCompany.jsx';
+import PlacementPolicy from './components/PlacementPolicy.jsx'; 
 export default function App() {
   return (
     <>
