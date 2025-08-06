@@ -16,6 +16,7 @@ import CreateCompanyForm from './components/Company/CreateCompany.jsx';
 =======
 import PlacementPolicy from './components/PlacementPolicy.jsx';
 >>>>>>> f3e91e3883e5789273761467d6761cd6e7b2a286
+import CreateCompanyForm from './components/Company/CreateCompany.jsx';
 
 export default function App() {
   return (
