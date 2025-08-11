@@ -2,42 +2,99 @@ import Student from "../Models/Student.js";
 
 export const registerStudent = async (req, res) => {
   try {
-    const { 
-      email, collegeRollNo, name, mobileNo, course, dob, gender, 
-      tenthCGPA, twelfthCGPA, ugCGPA, pgCGPA, backlogs 
-    } = req.body;
+    // sessionEmail will be sent from frontend alongside the rest of form data
+    const { sessionEmail, ...formData } = req.body;
+    console.log(sessionEmail);
 
-    console.log("Incoming Request Body:", req.body); // Debug log
+    if (!sessionEmail) {
+      console.log("No session email provided in request.");
+      return res.status(400).json({ message: "Session email is required." });
+    }
 
-    // Check if student exists
-    const student = await Student.findOne({ email });
+    console.log("Session Email for Lookup:", sessionEmail);
+    console.log("Incoming Request Body:", formData);
+
+    // Check if student exists using ONLY session email
+    const student = await Student.findOne({ email: sessionEmail });
 
     if (!student) {
-      console.log("Student not found in DB:", email);
+      console.log("Student not found in DB:", sessionEmail);
       return res.status(404).json({ message: "Student not found." });
     }
 
-    // Fields to update
-    const updatedFields = {
-      collegeRollNo,
+    // Keep all your existing fields exactly as before
+    const {
+      email, // This is the form email — can be different from session email
       name,
-      mobileNo,  // ✅ Ensure this is received in req.body
-      course,
+      alternateEmail,
+      correspondenceAddress,
+      permanentAddress,
+      phoneNumber,
+      alternatePhoneNumber,
       dob,
       gender,
-      tenthCGPA,
-      twelfthCGPA,
-      ugCGPA,
-      pgCGPA: pgCGPA || null,
-      backlogs,
+      course,
+      classRollNumber,
+      examRollNumberUG,
+      sgpa,
+      numBacklogs,
+      backlogDetails,
+      collegeName,
+      university,
+      examRollNumberPG,
+      cgpa,
+      yearOfPassingPG,
+      board12,
+      examRollNumber12,
+      percentage12,
+      yearOfPassing12,
+      board10,
+      examRollNumber10,
+      percentage10,
+      yearOfPassing10,
+      resumeLink,
+      marksheetDriveLink,
+      placementConsent,
+    } = formData;
+
+    const updatedFields = {
+      name,
+      alternateEmail,
+      correspondenceAddress,
+      permanentAddress,
+      phoneNumber,
+      alternatePhoneNumber,
+      dob,
+      gender,
+      course,
+      classRollNumber,
+      examRollNumberUG,
+      sgpa,
+      numBacklogs,
+      backlogDetails,
+      collegeName,
+      university,
+      examRollNumberPG,
+      cgpa,
+      yearOfPassingPG,
+      board12,
+      examRollNumber12,
+      percentage12,
+      yearOfPassing12,
+      board10,
+      examRollNumber10,
+      percentage10,
+      yearOfPassing10,
+      resumeLink,
+      marksheetDriveLink,
+      placementConsent,
       registered: "yes",
     };
 
-    console.log("Updated Fields Before DB Update:", updatedFields); // Debug log
+    console.log("Updated Fields Before DB Update:", updatedFields);
 
-    // Update student data
     const updatedStudent = await Student.findOneAndUpdate(
-      { email },
+      { email: sessionEmail }, // lookup by session email only
       { $set: updatedFields },
       { new: true, runValidators: true }
     );
@@ -47,14 +104,15 @@ export const registerStudent = async (req, res) => {
       return res.status(500).json({ message: "Failed to update student details." });
     }
 
-    console.log("Student Updated Successfully:", updatedStudent); // Debug log
+    console.log("Student Updated Successfully:", updatedStudent);
     res.status(200).json({ message: "Registration successful.", student: updatedStudent });
 
   } catch (error) {
-    console.error("Error in registerStudent:", error); // Log full error stack
+    console.error("Error in registerStudent:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 
 export const getStudentByEmail = async (req, res) => {
