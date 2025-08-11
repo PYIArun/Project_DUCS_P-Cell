@@ -4,19 +4,28 @@ import ReactMarkdown from 'react-markdown';
 
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
-  const [content, setContent] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/announcements")
-      .then(response => {
-        setContent(response.data);
-        setAnnouncements(response.data.map(item => ({
-          ...item,
-          isExpanded: false
-        })));
-      })
-      .catch(error => console.error("Error fetching announcements:", error));
+    if (active === "latest") {
+      axios.get("http://localhost:5000/announcements")
+        .then(response => {
+          setAnnouncements(response.data.map(item => ({
+            ...item,
+            isExpanded: false
+          })));
+        })
+        .catch(error => console.error("Error fetching announcements:", error));
+    }
+
+    if (active === "jobs") {
+      axios.get("http://localhost:5000/companies")
+        .then(response => {
+          setCompanies(response.data);
+        })
+        .catch(error => console.error("Error fetching companies:", error));
+    }
   }, [active]);
 
   const toggleExpand = (index) => {
@@ -47,6 +56,8 @@ const StudentHome = () => {
 
       {/* Content Container */}
       <div className="bg-[#F8F7F9] w-full rounded-xl py-4 px-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+
+        {/* Announcements */}
         {active === "latest" && announcements.map((item, index) => (
           <div
             key={index}
@@ -64,7 +75,7 @@ const StudentHome = () => {
             >
               <ReactMarkdown
                 components={{
-                  code({ node, inline, className, children, ...props }) {
+                  code({ inline, children, ...props }) {
                     return (
                       <code
                         className={`text-sm break-words ${inline ? '' : 'block p-2 bg-gray-100 rounded'}`}
@@ -96,19 +107,42 @@ const StudentHome = () => {
           </div>
         ))}
 
-        {active === "jobs" && content.map((item, index) => (
+        {/* Jobs / Companies */}
+        {active === "jobs" && companies.map((company, index) => (
           <div
             key={index}
-            className="w-full bg-white mb-4 p-4 rounded-lg shadow-sm overflow-hidden break-words"
+            className="flex items-center justify-between bg-white mb-4 p-4 rounded-lg shadow-sm overflow-hidden break-words"
           >
-            <div className="flex items-center mb-2">
-              <p className="text-xl font-semibold">{item.title}</p>
-              <p className="text-gray-400 text-sm ml-auto text-right">
-                Date Posted: {item.date_of_announcements}, {item.time_of_announcements}
-              </p>
+            {/* Left: Logo */}
+            <div className="flex items-center">
+              <div className="flex-shrink-0 flex w-[82px] h-[82px] align-center p-1 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+              <img
+                src={"https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg"}
+                alt={`${company.title} logo`}
+                className="max-w-full  w-auto h-auto object-contain mx-auto my-auto"
+              />
             </div>
+              {/* Middle: Details */}
+              <div className="ml-4 flex flex-col">
+                <p className="text-xl font-semibold mb-1">{company.title}</p>
+                <p className="text-gray-700 text-sm"><strong>CTC:</strong> {company.ctc}</p>
+                <p className="text-gray-700 text-sm"><strong>Role:</strong> {company.role}</p>
+                <p className="text-gray-700 text-sm"><strong>Applicable Courses:</strong> {company.applicable_courses}</p>
+              </div>
+            </div>
+
+            {/* Right: Apply Button */}
+            <button
+              className="  bg-[#913e7c] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#72265F] transition-all"
+              onClick={() => alert(`Applying for ${company.title}`)}
+            >
+              Apply
+            </button>
           </div>
         ))}
+
+
+
       </div>
     </div>
   );

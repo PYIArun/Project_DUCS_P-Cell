@@ -14,15 +14,15 @@ const router = express.Router();
 router.get("/coordinators", getAllCoordinators);  // ✅ Fetch all coordinators
 
 // 🔹 GET a specific coordinator by email
-router.get("/:email", getCoordinatorByEmail);
+router.get("/coordinator/:email", getCoordinatorByEmail);
 
 // 🔹 POST a new coordinator
-router.post("/", addCoordinator);
+router.post("/coordinator", addCoordinator);
 
 // 🔹 PUT (update) a coordinator by email
-router.put("/:email", updateCoordinator);
+router.put("/coordinator/:email", updateCoordinator);
 
 // 🔹 DELETE a coordinator by email
-router.delete("/:email", deleteCoordinator);
+router.delete("/coordinator/:email", deleteCoordinator);
 
 export default router;

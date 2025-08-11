@@ -14,9 +14,11 @@ export const createCompany = async (req, res) => {
 // READ all companies
 export const getAllCompanies = async (req, res) => {
   try {
+    console.log("here");
     const companies = await Company.find().populate('applied_students');
     res.status(200).json(companies);
   } catch (error) {
+    console.log("here");
     res.status(500).json({ message: 'Error fetching companies', error });
   }
 };

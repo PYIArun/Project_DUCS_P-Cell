@@ -3,18 +3,18 @@ import axios from 'axios';
 
 const CreateCompanyForm = () => {
     const [formData, setFormData] = useState({
-        title: '',
-        role: '',
-        location: '',
+        title: 'fdsafsd',
+        role: 'asfsadf',
+        location: 'sadfsad',
         job_type: 'Full-time',
-        job_function: '',
-        job_profile: '',
-        ctc: '',
-        description: '',
-        required_skills: '',
-        additional_info: '',
-        eligibility: '',
-        applicable_courses: '',
+        job_function: 'fsdafasdf',
+        job_profile: 'sadfdsa',
+        ctc: '322',
+        description: 'fdsafsad',
+        required_skills: 'fasfsa',
+        additional_info: 'fsadfdsa',
+        eligibility: 'fsadf',
+        applicable_courses: 'fdsafds',
         logo: ''
     });
 
@@ -40,7 +40,7 @@ const CreateCompanyForm = () => {
                 applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim())
             };
 
-            await axios.post('/api/companies', payload);
+            await axios.post('http://localhost:5000/company', payload);
             setSuccess('✅ Company created successfully!');
             setFormData({
                 title: '',
@@ -67,7 +67,7 @@ const CreateCompanyForm = () => {
 
     return (
         <div className="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-xl p-8 border border-gray-200">
-            <h2 className="text-3xl font-bold mb-6 text-blue-600">Create Company</h2>
+            <h2 className="text-3xl font-bold mb-6 text-[#72265F]">Create Company</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                     { label: 'Company Title', name: 'title' },
