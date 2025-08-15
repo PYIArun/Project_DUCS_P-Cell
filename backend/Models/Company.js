@@ -15,7 +15,7 @@ const CompanySchema = new mongoose.Schema({
     },
     applied_students: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Student' // Replace with your student model name
+        ref: 'Student'  
     }],
     job_type: {
         type: String,

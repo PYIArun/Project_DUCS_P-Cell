@@ -65,10 +65,21 @@ export default function RegistrationPage() {
     if (!validateForm()) return;
 
     try {
-      await axios.post("http://localhost:5000/student/register", formData);
+      const sessionEmail = sessionStorage.getItem('userEmail'); // for backend lookup
+      console.log(sessionEmail);
+      if (!sessionEmail) {
+        toast.error("No session email found!");
+        return;
+      }
+
+      // Send session email separately + form data
+      const dataToSend = { sessionEmail, ...formData };
+
+      await axios.post("http://localhost:5000/student/register", dataToSend);
       toast.success("Registration Successful!");
     } catch (error) {
       toast.error("Registration Failed!");
+      console.error("Registration Error:", error);
     }
   };
 
@@ -85,7 +96,12 @@ export default function RegistrationPage() {
               {/* Personal Information */}
               <div>
                 <Label className={labelClass}>Email Address</Label>
-                <Input name="email" placeholder="e.g. example@college.edu" className={inputClass} onChange={handleChange} />
+                <Input
+                  name="email"
+                  value={sessionStorage.getItem('userEmail') || ""}
+                  readOnly
+                  className={inputClass}
+                />
               </div>
               <div>
                 <Label className={labelClass}>Name</Label>

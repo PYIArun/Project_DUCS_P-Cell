@@ -46,6 +46,7 @@ const googleLogin = async () => {
         // Send email to backend for validation & student data
         const response = await axios.get(`http://localhost:5000/student/${userEmail}`);
         const student = response.data; // Backend returns student data
+        console.log(student);
         
            // 🔹 Store login status and role in session storage
         sessionStorage.setItem("userEmail", userEmail);
@@ -65,7 +66,7 @@ const googleLogin = async () => {
             navigate("/register"); // Redirect to registration page
             window.location.reload();  // Force re-render
         } else {
-            navigate("/companylistings"); // Redirect to main page (company listing)
+            navigate("/studentHome "); 
         }
 
     } catch (error) {

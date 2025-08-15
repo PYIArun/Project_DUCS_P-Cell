@@ -7,25 +7,23 @@ import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-import slide_image_1 from './assets/images/img_1.jpg';
-import slide_image_2 from './assets/images/img_2.jpg';
-import slide_image_3 from './assets/images/img_3.jpg';
-import slide_image_4 from './assets/images/img_4.jpg';
-import slide_image_5 from './assets/images/img_5.jpg';
-import slide_image_6 from './assets/images/img_6.jpg';
-import slide_image_7 from './assets/images/img_7.jpg';
-
-import { MdOutlineSwipeLeft, MdOutlineSwipeRight } from "react-icons/md";
+import slide_image_1 from '../../public/images/alumni_photos/ankush_khanna.jpeg';
+import slide_image_2 from '../../public/images/alumni_photos/sandeep_jain.jpeg';
+import slide_image_3 from '../../public/images/alumni_photos/anubhav_sethi.jpeg';
+import slide_image_4 from '../../public/images/alumni_photos/manisha_bansal.jpeg';
+import slide_image_5 from '../../public/images/alumni_photos/nikhil_aggarwal.jpeg';
+import slide_image_6 from '../../public/images/alumni_photos/manoj_yadav.jpeg';
+import slide_image_7 from '../../public/images/alumni_photos/seema_goel.jpeg';
 
 function Slider() {
   const data = [
-    { img: slide_image_1, name: 'John Doe', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-    { img: slide_image_2, name: 'Jane Smith', description: 'Curabitur ac felis arcu. Ut tincidunt quam vitae fringilla tempus.' },
-    { img: slide_image_3, name: 'Michael Lee', description: 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices.' },
-    { img: slide_image_4, name: 'Sarah Williams', description: 'Pellentesque habitant morbi tristique senectus et netus et malesuada.' },
-    { img: slide_image_5, name: 'Chris Johnson', description: 'Aenean ut justo et arcu finibus laoreet at quis sapien.' },
-    { img: slide_image_6, name: 'Emily Davis', description: 'Duis placerat massa eget erat tincidunt scelerisque.' },
-    { img: slide_image_7, name: 'David Brown', description: 'Maecenas volutpat massa quis volutpat feugiat.' },
+    { img: slide_image_6, name: 'Manoj Yadav', description: 'Founder&CEO @ Prismberry Technologies, General Manager @ eYantra Ventures - EMEA' },
+    { img: slide_image_5, name: 'Nikhil Aggarwal', description: 'CEO @ VectoScalar, Co-Founder & CTO at WorldClass Tech Talent Pvt. Ltd.' },
+    { img: slide_image_7, name: 'Seema Goel', description: 'Vice President at HCL Technologies, Ex-AVP Ex-Global Director at HCL Technologies' },
+    { img: slide_image_2, name: 'Sandeep Jain', description: 'Sr. Engineering Manager at Adobe, Personal Finance guide, Coach & Mentor' },
+    { img: slide_image_4, name: 'Manisha Bansal', description: 'SDE at Cisco (San Jose), Ex-Technical Lead at Aricent Group' },
+    { img: slide_image_1, name: 'Ankush Khanna', description: 'SDE III at Google, Ex- SDE II at Microsoft, Ex- SDE II at Zomato, Ex-SDE at Paytm' },
+    { img: slide_image_3, name: 'Anubhav Sethi', description: 'SDE III at Google, Ex-SDE at Amazon, Ex-SDE at Walmart, Ex-SDE at HiLabs' },
   ];
 
   return (

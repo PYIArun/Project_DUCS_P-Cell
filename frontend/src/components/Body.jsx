@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { FaRegFilePdf } from "react-icons/fa";
 import Slider from "./Slider";
@@ -19,12 +15,20 @@ const slides = [
   "./images/slides/4.jpeg",
 ];
 
+const brochures = [
+  { year: "2025-2026", link: "https://drive.google.com/file/d/1sAviVJALVryVPGC1SNsV8XaZpubT8ndR/view?usp=sharing" },
+  { year: "2024-2025", link: "https://drive.google.com/file/d/1N6MtHPaPsU0LQwM9TZgvtkKPrDxwJ1IR/view?usp=sharing" },
+  { year: "2023-2024", link: "https://drive.google.com/file/d/18aL-LnRcClBzOSdVkw83VhxXN0rmVKQs/view?usp=sharing" },
+  { year: "2022-2023", link: "https://drive.google.com/file/d/1n1l79K07EytqJY-6Pz_Hvm80qOt4qnQ8/view?usp=sharing" }
+];
+
+
 import { FaLinkedin } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { BsFillTelephoneFill } from "react-icons/bs";
 import { Mail } from "react-feather";
 import axios from 'axios';
-import { useNavigate } from "react-router-dom";
+
 
 const Body = () => {
 
@@ -105,14 +109,17 @@ const Body = () => {
             </h1>
 
             <div className="flex mt-[2rem] flex-col justify-center mx-auto gap-[2rem] w-full lg:w-[80%]">
-              {["2025-2026", "2024-2025", "2023-2024"].map((year, index) => (
-                <button
-                  key={index}
-                  className="px-[1.2rem] py-[0.6rem] border-[0.15rem] rounded-3xl border-[#D266FE] hover:bg-[#D266FE] hover:scale-105 hover:transition-all hover:ease-in active:scale-95 transition-all ease-in font-instrument text-[#72265F] hover:text-white"
-                >
-                  Brochure {year}
-                </button>
-              ))}
+             {brochures.map((item, index) => (
+              <a
+                key={index}
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-[1.2rem] py-[0.6rem] border-[0.15rem] rounded-3xl border-[#D266FE] hover:bg-[#D266FE] hover:scale-105 hover:transition-all hover:ease-in active:scale-95 transition-all ease-in font-instrument text-[#72265F] hover:text-white text-center"
+              >
+                Brochure {item.year}
+              </a>
+            ))}
             </div>
           </div>
         </div>
@@ -214,10 +221,7 @@ const Body = () => {
                     Senior Faculty Advisor
                   </h4>
                   <p className="text-sm font-instrument text-gray-600 text-center px-4">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Incidunt quidem ex dolor. Nemo, saepe cumque! Officiis
-                    cupiditate voluptatum similique amet nulla laboriosam, iusto
-                    recusandae minima! Animi qui voluptatum fugiat debitis.
+                    <i>&quot;The Department of Computer Science, University of Delhi offers MCA, M.Sc., and Ph.D. programs, fostering industry-ready skills and research excellence. Alumni hold leading positions worldwide in IT and academia.&quot;</i>
                   </p>
                 </div>
               </div>
@@ -229,7 +233,7 @@ const Body = () => {
                       className="object-cover w-full h-full rounded-[0.7rem]"
                       src="./images/placement_team/drompal.png"
                       alt="Dr. Om Pal"
-                    />
+                      />
                   </div>
                   <h3 className="font-instrument font-semibold text-2xl text-[#72265F]">
                     Dr. Om Pal
@@ -238,17 +242,14 @@ const Body = () => {
                     Faculty Advisor
                   </h4>
                   <p className="text-sm font-instrument text-gray-600 text-center px-4">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Incidunt quidem ex dolor. Nemo, saepe cumque! Officiis
-                    cupiditate voluptatum similique amet nulla laboriosam, iusto
-                    recusandae minima! Animi qui voluptatum fugiat debitis.
+                      <i>&quot;Renowned for academic excellence, the Department of Computer Science, University of Delhi, offers MCA, M.Sc., and Ph.D. programs, producing industry-ready professionals and researchers. Alumni excel globally in IT and academia. We warmly invite you to join our 2024-25 placement drive to connect with top talent.&quot;</i>
                   </p>
                 </div>
               </div>
             </div>
           </div>
      {/* Coordinators & Treasurer */}
-          <div className="w-[90%] mx-auto mt-[4rem]">
+          <div className="w-[90%] mx-auto mt-[4rem] mb-[2rem]">
       <div className="flex flex-wrap justify-center gap-8">
         {coordinators.map((coordinator, index) => (
           <div
@@ -313,7 +314,7 @@ const Body = () => {
           {/* Middle - Map */}
           <div className="w-[60%] h-[200px] mobile:w-[120%] mobile:pl-[1.1rem] mobile:mt-[1rem]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=..."
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3345.1030066973008!2d77.207027!3d28.6880527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd928daadb91%3A0x76aa925fc6e58347!2sDepartment%20of%20Computer%20Science%2C%20University%20of%20Delhi!5e1!3m2!1sen!2sin!4v1754933407282!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -322,6 +323,8 @@ const Body = () => {
               referrerPolicy="no-referrer-when-downgrade"
               title="University of Delhi Map"
             ></iframe>
+
+            
           </div>
 
           {/* Right - Contact Us */}
