@@ -7,6 +7,14 @@ const StudentHome = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [companies, setCompanies] = useState([]);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [resumeLink, setResumeLink] = useState("");
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleApplyClick = () => {
+    setShowPopup(true);
+  };
+
   useEffect(() => {
     if (active === "latest") {
       axios.get("http://localhost:5000/announcements")
@@ -34,6 +42,9 @@ const StudentHome = () => {
         i === index ? { ...item, isExpanded: !item.isExpanded } : item
       )
     );
+  };
+  const handleSubmit = () => {
+    
   };
 
   return (
@@ -116,12 +127,12 @@ const StudentHome = () => {
             {/* Left: Logo */}
             <div className="flex items-center">
               <div className="flex-shrink-0 flex w-[82px] h-[82px] align-center p-1 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-              <img
-                src={"https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg"}
-                alt={`${company.title} logo`}
-                className="max-w-full  w-auto h-auto object-contain mx-auto my-auto"
-              />
-            </div>
+                <img
+                  src={"https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg"}
+                  alt={`${company.title} logo`}
+                  className="max-w-full  w-auto h-auto object-contain mx-auto my-auto"
+                />
+              </div>
               {/* Middle: Details */}
               <div className="ml-4 flex flex-col">
                 <p className="text-xl font-semibold mb-1">{company.title}</p>
@@ -134,15 +145,69 @@ const StudentHome = () => {
             {/* Right: Apply Button */}
             <button
               className="  bg-[#913e7c] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#72265F] transition-all"
-              onClick={() => alert(`Applying for ${company.title}`)}
+              onClick={() => handleApplyClick()}
             >
               Apply
             </button>
+            {/* Popup Modal */}
+            {showPopup && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-xl max-w-lg w-full shadow-lg">
+                  <h2 className="text-xl font-semibold mb-4">Submit Application</h2>
+
+                  {/* Resume Link Input */}
+                  <label className="block mb-2 font-medium">Resume Link</label>
+                  <input
+                    type="url"
+                    value={resumeLink}
+                    onChange={(e) => setResumeLink(e.target.value)}
+                    placeholder="Enter your resume link"
+                    className="w-full border border-gray-300 rounded-lg p-2 mb-4"
+                  />
+
+                  {/* Declaration */}
+                  <div className="flex items-start gap-2 mb-4">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => setIsChecked(e.target.checked)}
+                      className="mt-1"
+                    />
+                    <p className="text-sm">
+                      I hereby declare that I will make myself available for all
+                      mandatory events related to the Placement Drive, including but
+                      not limited to the Pre-Placement Talk, Online Assessment, and
+                      Interview Rounds, as per the communicated schedule. <br />
+                      In case of an unavoidable emergency, I shall inform the Placement
+                      Team in advance by sending a formal email with valid supporting
+                      documents to <b>placements@cs.du.ac.in</b>. <br />
+                      Failure to comply with this protocol may result in my being
+                      marked as a defaulter.
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setShowPopup(false)}
+                      className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled = {!isChecked}
+                      className="px-4 py-2 bg-[#72265F] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg hover:bg-[#602050]"
+                    >
+                      Submit Application
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         ))}
-
-
-
       </div>
     </div>
   );
