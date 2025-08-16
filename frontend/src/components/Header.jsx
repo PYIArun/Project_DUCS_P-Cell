@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { IoMdMail } from "react-icons/io";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-scroll";
-import axios from "axios";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,42 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, FileText } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from ".././context/AuthContext"; 
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const [userEmail, setUserEmail] = useState(null);
-  const [userRegistered, setUserRegistered] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
-
-  useEffect(() => {
-    const storedEmail = sessionStorage.getItem("userEmail");
-    const storedLoginStatus = sessionStorage.getItem("loginStatus");
-    if (storedEmail && storedLoginStatus === "true") {
-      setUserEmail(storedEmail);
-      setIsLogin(true);
-      axios
-        .get(`http://localhost:5000/student/${storedEmail}`)
-        .then((response) => {
-          const student = response.data;
-          setUserRegistered(student.registered === "yes");
-        })
-        .catch((error) => {
-          console.error("Error fetching student data:", error);
-        });
-    }
-  }, [isLogin]);
+  const { userEmail, userRegistered, isLogin, role, logout } = useAuth();
 
   const handleLogout = () => {
-    sessionStorage.clear();
-    setUserRegistered(false);
-    setUserEmail(null);
-    setUserRegistered(false);
-    setIsLogin(false);
+    logout();
     navigate("/");
-    window.location.reload();
   };
 
   return (
@@ -112,7 +84,8 @@ const Header = () => {
               <DropdownMenuLabel>{userEmail}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                {!userRegistered && (
+                {/* Show Register option only for students who aren't registered */}
+                {role === "Student" && !userRegistered && (
                   <DropdownMenuItem
                     onClick={() => navigate("/register")}
                     className="hover:bg-[#f3e8f5] cursor-pointer"
@@ -122,32 +95,52 @@ const Header = () => {
                   </DropdownMenuItem>
                 )}
 
-                <DropdownMenuItem
-                  disabled={!userRegistered}
-                  onClick={() => navigate("/studentHome")}
-                  className="hover:bg-[#f3e8f5] cursor-pointer"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Student Home </span>
-                </DropdownMenuItem>
+                {/* Student Home - only for registered students */}
+                {role === "Student" && (
+                  <DropdownMenuItem
+                    disabled={!userRegistered}
+                    onClick={() => navigate("/studentHome")}
+                    className="hover:bg-[#f3e8f5] cursor-pointer"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Student Home</span>
+                  </DropdownMenuItem>
+                )}
 
-                <DropdownMenuItem
-                  disabled={!userRegistered}
-                  onClick={() => navigate("/edit-profile")}
-                  className="hover:bg-[#f3e8f5] cursor-pointer"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Edit Profile</span>
-                </DropdownMenuItem>
+                {/* Edit Profile - only for registered students */}
+                {role === "Student" && (
+                  <DropdownMenuItem
+                    disabled={!userRegistered}
+                    onClick={() => navigate("/edit-profile")}
+                    className="hover:bg-[#f3e8f5] cursor-pointer"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Edit Profile</span>
+                  </DropdownMenuItem>
+                )}
 
-                <DropdownMenuItem
-                  disabled={!userRegistered}
-                  onClick={() => navigate("/placement-policy")}
-                  className="hover:bg-[#f3e8f5] cursor-pointer"
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>Placement Policy 2025-26</span>
-                </DropdownMenuItem>
+                {/* Coordinator Dashboard - only for coordinators */}
+                {role === "PlacementCoordinator" && (
+                  <DropdownMenuItem
+                    onClick={() => navigate("/announcements")}
+                    className="hover:bg-[#f3e8f5] cursor-pointer"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Coordinator Dashboard</span>
+                  </DropdownMenuItem>
+                )}
+
+                {/* Placement Policy - for registered students */}
+                {role === "Student" && (
+                  <DropdownMenuItem
+                    disabled={!userRegistered}
+                    onClick={() => navigate("/placement-policy")}
+                    className="hover:bg-[#f3e8f5] cursor-pointer"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Placement Policy 2025-26</span>
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuItem
                   onClick={handleLogout}
