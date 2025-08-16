@@ -383,3 +383,58 @@ const StudentHome = () => {
 };
 
 export default StudentHome;
+
+
+
+
+
+import { Routes, Route } from 'react-router-dom';
+import Homepage from './components/Homepage.jsx';
+import CreateHighlight from './components/CreateHighlight.jsx';
+import Header from './components/Header.jsx';
+import Login from './components/Login/Login.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Footer from './components/Footer.jsx';
+import Register from './components/Register.jsx';
+import EditProfile from './components/EditProfile.jsx';
+import CreateAnnouncement from './components/CreateAnnouncements.jsx';
+import StudentHome from './components/Home/StudentHome.jsx';
+import CreateCompanyForm from './components/Company/CreateCompany.jsx';
+import PlacementPolicy from './components/PlacementPolicy.jsx';
+import { AuthProvider } from './context/AuthContext.jsx'; 
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Header />
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover={false}
+        theme="light"
+        // transition="bounce" 
+      />
+      <Routes>
+        <Route path="/" element={<Homepage />} /> (not needed protected route)
+        <Route path="/create-highlights" element={<CreateHighlight />} /> (protected route can be accessed by coordinator only)
+        <Route path="/login" element={<Login />} /> (not needed)
+        <Route path="/register" element={<Register />} /> (protected route can be accessed by student only)
+        <Route path="/create-job-announcements" element={<CreateCompanyForm />} />(protected route can be accessed by coordinator only)
+        <Route path="/studentHome" element={<StudentHome />} />(protected route can be accessed by coordinator and student both only)
+        <Route path="/edit-profile" element={<EditProfile />} /> (protected route can be accessed by student  only)
+        <Route path="/create-announcements" element={<CreateAnnouncement />} /> (protected route can be accessed by coordinator  only)
+        <Route path="/placement-policy" element={<PlacementPolicy />} /> ((protected route can be accessed by student &  coordinator only)
+      </Routes>
+      <Footer/>
+    </AuthProvider>
+  );
+}
+
+So i want to setup protected route  for these 
