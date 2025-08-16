@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
   const [announcements, setAnnouncements] = useState([]);
   const [companies, setCompanies] = useState([]);
 
-  const [showPopup, setShowPopup] = useState(false);
-  const [resumeLink, setResumeLink] = useState("");
-  const [isChecked, setIsChecked] = useState(false);
+  const navigate = useNavigate();
 
-  const handleApplyClick = () => {
-    setShowPopup(true);
+
+
+  const handleApplyClick = (id) => {
+    navigate(`/company/${id}`);
   };
 
   useEffect(() => {
@@ -42,9 +43,6 @@ const StudentHome = () => {
         i === index ? { ...item, isExpanded: !item.isExpanded } : item
       )
     );
-  };
-  const handleSubmit = () => {
-    
   };
 
   return (
@@ -145,66 +143,11 @@ const StudentHome = () => {
             {/* Right: Apply Button */}
             <button
               className="  bg-[#913e7c] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#72265F] transition-all"
-              onClick={() => handleApplyClick()}
+              onClick={() => handleApplyClick(company._id)}
             >
               Apply
             </button>
-            {/* Popup Modal */}
-            {showPopup && (
-              <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-                <div className="bg-white p-6 rounded-xl max-w-lg w-full shadow-lg">
-                  <h2 className="text-xl font-semibold mb-4">Submit Application</h2>
-
-                  {/* Resume Link Input */}
-                  <label className="block mb-2 font-medium">Resume Link</label>
-                  <input
-                    type="url"
-                    value={resumeLink}
-                    onChange={(e) => setResumeLink(e.target.value)}
-                    placeholder="Enter your resume link"
-                    className="w-full border border-gray-300 rounded-lg p-2 mb-4"
-                  />
-
-                  {/* Declaration */}
-                  <div className="flex items-start gap-2 mb-4">
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={(e) => setIsChecked(e.target.checked)}
-                      className="mt-1"
-                    />
-                    <p className="text-sm">
-                      I hereby declare that I will make myself available for all
-                      mandatory events related to the Placement Drive, including but
-                      not limited to the Pre-Placement Talk, Online Assessment, and
-                      Interview Rounds, as per the communicated schedule. <br />
-                      In case of an unavoidable emergency, I shall inform the Placement
-                      Team in advance by sending a formal email with valid supporting
-                      documents to <b>placements@cs.du.ac.in</b>. <br />
-                      Failure to comply with this protocol may result in my being
-                      marked as a defaulter.
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex justify-end gap-3">
-                    <button
-                      onClick={() => setShowPopup(false)}
-                      className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSubmit}
-                      disabled = {!isChecked}
-                      className="px-4 py-2 bg-[#72265F] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg hover:bg-[#602050]"
-                    >
-                      Submit Application
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            
 
           </div>
         ))}

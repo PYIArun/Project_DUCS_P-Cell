@@ -11,6 +11,7 @@ import EditProfile from './components/EditProfile.jsx';
 import CreateAnnouncement from './components/CreateAnnouncements.jsx';
 import StudentHome from './components/Home/StudentHome.jsx';
 import CreateCompanyForm from './components/Company/CreateCompany.jsx';
+import ViewCompany from './components/Company/ViewCompany.jsx';
 import PlacementPolicy from './components/PlacementPolicy.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
@@ -18,6 +19,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute.jsx';
 import CoordinatorRoute from './components/ProtectedRoute/CoordinatorRoute.jsx';
 import StudentRoute from './components/ProtectedRoute/StudentRoute.jsx';
+import { CompanyProvider } from './context/CompanyContext.jsx';
 
 export default function App() {
   return (
