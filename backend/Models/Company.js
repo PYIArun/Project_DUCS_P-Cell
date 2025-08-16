@@ -9,14 +9,16 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    hiring_workflow : {
+        type : String,
+        required : true
+
+    },
     location: {
         type: String,
         required: true,
     },
-    applied_students: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Student'  
-    }],
+    applied_students: [],
     job_type: {
         type: String,
         enum: ['Full-time', 'Remote' , 'Internship', 'Intership + full-time'],

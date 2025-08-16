@@ -37,9 +37,20 @@ export const getCompanyById = async (req, res) => {
 // UPDATE a company by ID
 export const updateCompany = async (req, res) => {
   try {
+    const { id } = req.params;
+    const { email } = req.body;
+    const company = await Company.findById(id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+    if (company.applied_students.includes(email)) {
+      return res.status(400).json({ message: 'Student has already applied to this company' });
+    }
+
+    // Push student email to applied_students array
     const updatedCompany = await Company.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+      id,
+      { $push: { applied_students: email } }, // $push adds email to array
       { new: true, runValidators: true }
     );
     if (!updatedCompany) return res.status(404).json({ message: 'Company not found' });

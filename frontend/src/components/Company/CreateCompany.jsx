@@ -12,8 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";  
 import { Label } from "@/components/ui/label";
 import { MdDelete, MdMoreVert } from "react-icons/md";
+import { useNavigate } from 'react-router-dom';
 
-const CreateCompanyForm = () => {
+const CreateCompany = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
         role: '',
@@ -69,7 +71,7 @@ const CreateCompanyForm = () => {
                 required_skills: formData.required_skills.split(',').map((s) => s.trim()),
                 applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim())
             };
-
+            console.log(payload);
             await axios.post('http://localhost:5000/companies', payload);
             setSuccess('✅ Company created successfully!');
             setFormData({
@@ -81,6 +83,7 @@ const CreateCompanyForm = () => {
                 job_profile: '',
                 ctc: '',
                 description: '',
+                hiring_workflow: '',
                 required_skills: '',
                 additional_info: '',
                 eligibility: '',
@@ -102,6 +105,7 @@ const CreateCompanyForm = () => {
             role: '',
             location: '',
             job_type: 'Full-time',
+            hiring_workflow : "",
             job_function: '',
             job_profile: '',
             ctc: '',
@@ -226,6 +230,18 @@ const CreateCompanyForm = () => {
                                             value={formData.description}
                                             onChange={handleChange}
                                             placeholder="Job description"
+                                            rows={4}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="hiring_workflow">Hiring Workflow</Label>
+                                        <Textarea
+                                            id="hiring_workflow"
+                                            name="hiring_workflow"
+                                            value={formData.hiring_workflow}
+                                            onChange={handleChange}
+                                            placeholder="Hiring workflow"
                                             rows={4}
                                             required
                                         />
@@ -370,7 +386,7 @@ const CreateCompanyForm = () => {
                                             className="bg-[#913e7c] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#72265F] transition-all mr-8"
                                             onClick={() => {
                                                 // Handle view details - you can implement this later
-                                                console.log('View details for:', company.title);
+                                                navigate(`/company/${company._id}`)
                                             }}
                                         >
                                             View Details
@@ -410,4 +426,4 @@ const CreateCompanyForm = () => {
     );
 };
 
-export default CreateCompanyForm;
+export default CreateCompany;
