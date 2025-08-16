@@ -33,13 +33,13 @@ export default function App() {
       />
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/highlight" element={<CreateHighlight />} />
+        <Route path="/create-highlights" element={<CreateHighlight />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/company" element={<CreateCompanyForm />} />
+        <Route path="/create-job-announcements" element={<CreateCompanyForm />} />
         <Route path="/studentHome" element={<StudentHome />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/announcements" element={<CreateAnnouncement />} />
+        <Route path="/create-announcements" element={<CreateAnnouncement />} />
         <Route path="/placement-policy" element={<PlacementPolicy />} />
       </Routes>
       <Footer/>
