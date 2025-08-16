@@ -141,7 +141,7 @@ const Login = () => {
             });
 
             // Redirect to Coordinator Dashboard
-            navigate("/announcements");
+            navigate("/studentHome");
 
         } catch (error) {
             console.error("Login Error:", error);
