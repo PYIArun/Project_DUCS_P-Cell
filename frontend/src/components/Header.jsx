@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, FileText } from "lucide-react";
+import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from ".././context/AuthContext"; 
 
@@ -80,66 +80,108 @@ const Header = () => {
                 />
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 top-full left-0 bg-white shadow-lg border rounded-md z-50">
+            <DropdownMenuContent className="w-70 mr-[1rem] top-full left-0 bg-white shadow-lg border rounded-md z-50">
               <DropdownMenuLabel>{userEmail}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                {/* Show Register option only for students who aren't registered */}
-                {role === "Student" && !userRegistered && (
-                  <DropdownMenuItem
-                    onClick={() => navigate("/register")}
-                    className="hover:bg-[#f3e8f5] cursor-pointer"
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Register</span>
-                  </DropdownMenuItem>
-                )}
-
-                {/* Student Home - only for registered students */}
+                {/* Student Options */}
                 {role === "Student" && (
-                  <DropdownMenuItem
-                    disabled={!userRegistered}
-                    onClick={() => navigate("/studentHome")}
-                    className="hover:bg-[#f3e8f5] cursor-pointer"
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Student Home</span>
-                  </DropdownMenuItem>
+                  <>
+                    {/* Show Register option only for students who aren't registered */}
+                    {!userRegistered && (
+                      <DropdownMenuItem
+                        onClick={() => navigate("/register")}
+                        className="hover:bg-[#f3e8f5] cursor-pointer"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Register</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    {/* Student Home - only for registered students */}
+                    <DropdownMenuItem
+                      disabled={!userRegistered}
+                      onClick={() => navigate("/studentHome")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Student Home</span>
+                    </DropdownMenuItem>
+
+                    {/* Edit Profile - only for registered students */}
+                    <DropdownMenuItem
+                      disabled={!userRegistered}
+                      onClick={() => navigate("/edit-profile")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Edit Profile</span>
+                    </DropdownMenuItem>
+
+                    {/* Placement Policy - for registered students */}
+                    <DropdownMenuItem
+                      disabled={!userRegistered}
+                      onClick={() => navigate("/placement-policy")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>Placement Policy 2025-26</span>
+                    </DropdownMenuItem>
+
+                    {/* Mail to Placement Team - for students */}
+                    <DropdownMenuItem
+                      onClick={() => window.open('mailto:placements@cs.du.ac.in', '_blank')}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <MailCheck className="mr-2 h-4 w-4" />
+                      <span>Mail to Placement Team</span>
+                    </DropdownMenuItem>
+                  </>
                 )}
 
-                {/* Edit Profile - only for registered students */}
-                {role === "Student" && (
-                  <DropdownMenuItem
-                    disabled={!userRegistered}
-                    onClick={() => navigate("/edit-profile")}
-                    className="hover:bg-[#f3e8f5] cursor-pointer"
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Edit Profile</span>
-                  </DropdownMenuItem>
-                )}
-
-                {/* Coordinator Dashboard - only for coordinators */}
+                {/* Coordinator Options */}
                 {role === "PlacementCoordinator" && (
-                  <DropdownMenuItem
-                    onClick={() => navigate("/announcements")}
-                    className="hover:bg-[#f3e8f5] cursor-pointer"
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Coordinator Dashboard</span>
-                  </DropdownMenuItem>
-                )}
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/studentHome")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Student Home</span>
+                    </DropdownMenuItem>
 
-                {/* Placement Policy - for registered students */}
-                {role === "Student" && (
-                  <DropdownMenuItem
-                    disabled={!userRegistered}
-                    onClick={() => navigate("/placement-policy")}
-                    className="hover:bg-[#f3e8f5] cursor-pointer"
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>Placement Policy 2025-26</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/create-job-announcements")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      <span>Create Job Announcement</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate("/create-announcements")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <Megaphone className="mr-2 h-4 w-4" />
+                      <span>Create General Announcement</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate("/create-highlights")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <Star className="mr-2 h-4 w-4" />
+                      <span>Create Highlights</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate("/placement-policy")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>Placement Policy</span>
+                    </DropdownMenuItem>
+                  </>
                 )}
 
                 <DropdownMenuItem

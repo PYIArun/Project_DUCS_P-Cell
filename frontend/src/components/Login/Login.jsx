@@ -142,7 +142,6 @@ const Login = () => {
 
             // Redirect to Coordinator Dashboard
             navigate("/announcements");
-            // Removed window.location.reload() - context handles state updates!
 
         } catch (error) {
             console.error("Login Error:", error);

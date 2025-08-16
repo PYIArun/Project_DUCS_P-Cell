@@ -1,0 +1,385 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import { Calendar, Clock, MapPin, Building, DollarSign, User, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+
+const StudentHome = () => {
+  const [active, setActive] = useState("latest");
+  const [announcements, setAnnouncements] = useState([]);
+  const [companies, setCompanies] = useState([]);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [resumeLink, setResumeLink] = useState("");
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleApplyClick = () => {
+    setShowPopup(true);
+  };
+
+  useEffect(() => {
+    if (active === "latest") {
+      axios.get("http://localhost:5000/announcements")
+        .then(response => {
+          setAnnouncements(response.data.map(item => ({
+            ...item,
+            isExpanded: false
+          })));
+        })
+        .catch(error => console.error("Error fetching announcements:", error));
+    }
+
+    if (active === "jobs") {
+      axios.get("http://localhost:5000/companies")
+        .then(response => {
+          setCompanies(response.data);
+        })
+        .catch(error => console.error("Error fetching companies:", error));
+    }
+  }, [active]);
+
+  const toggleExpand = (index) => {
+    setAnnouncements(prev =>
+      prev.map((item, i) =>
+        i === index ? { ...item, isExpanded: !item.isExpanded } : item
+      )
+    );
+  };
+
+  const handleSubmit = () => {
+    // Handle form submission
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  return (
+    <div className="font-instrument min-h-screen my-16 rounded-lg w-full max-w-[70rem] mx-auto flex flex-col">
+      {/* Header Section */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#72265F] mb-2">Student Dashboard</h1>
+        <p className="text-gray-600">Stay updated with the latest announcements and job opportunities</p>
+      </div>
+
+      {/* Toggle Buttons */}
+      <div className="flex justify-center mb-6">
+        <div className="flex bg-gray-100 p-1 rounded-full shadow-inner">
+          <button
+            onClick={() => setActive("latest")}
+            className={`px-8 py-3 rounded-full font-medium transition-all duration-300 ${
+              active === "latest" 
+                ? "bg-white text-[#72265F] shadow-lg transform scale-105" 
+                : "text-gray-600 hover:text-[#72265F]"
+            }`}
+          >
+            📢 Latest Announcements
+          </button>
+          <button
+            onClick={() => setActive("jobs")}
+            className={`px-8 py-3 rounded-full font-medium transition-all duration-300 ${
+              active === "jobs" 
+                ? "bg-white text-[#72265F] shadow-lg transform scale-105" 
+                : "text-gray-600 hover:text-[#72265F]"
+            }`}
+          >
+            💼 Job Opportunities
+          </button>
+        </div>
+      </div>
+
+      {/* Content Container */}
+      <div className="bg-gradient-to-br from-gray-50 to-white w-full rounded-2xl border border-gray-200 shadow-xl py-6 px-6 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+
+        {/* Announcements */}
+        {active === "latest" && (
+          <div className="space-y-6">
+            {announcements.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📭</div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Announcements Yet</h3>
+                <p className="text-gray-500">Check back later for updates</p>
+              </div>
+            ) : (
+              announcements.map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100"
+                >
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-[#72265F] to-[#913e7c] p-4">
+                    <h2 className="text-xl font-bold text-white mb-2">{item.title}</h2>
+                    <div className="flex items-center gap-4 text-white/80 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Calendar size={16} />
+                        <span>{formatDate(item.date_of_announcements)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={16} />
+                        <span>{item.time_of_announcements}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <div
+                      className={`prose prose-sm max-w-none transition-all duration-300 ${
+                        item.isExpanded ? '' : 'line-clamp-4'
+                      }`}
+                    >
+                      <ReactMarkdown
+                        components={{
+                          code({ inline, children, ...props }) {
+                            return (
+                              <code
+                                className={`text-sm break-words ${
+                                  inline 
+                                    ? 'bg-gray-100 px-1 py-0.5 rounded text-[#72265F] font-medium' 
+                                    : 'block p-3 bg-gray-50 rounded-lg border border-gray-200'
+                                }`}
+                                {...props}
+                              >
+                                {children}
+                              </code>
+                            );
+                          },
+                          table({ children }) {
+                            return (
+                              <div className="overflow-x-auto w-full my-4">
+                                <table className="table-auto w-full border-collapse border border-gray-300">
+                                  {children}
+                                </table>
+                              </div>
+                            );
+                          },
+                          h1: ({ children }) => <h1 className="text-xl font-bold text-[#72265F] mb-3">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-lg font-semibold text-[#72265F] mb-2">{children}</h2>,
+                          p: ({ children }) => <p className="mb-3 text-gray-700 leading-relaxed">{children}</p>,
+                        }}
+                      >
+                        {item.content_of_announcements}
+                      </ReactMarkdown>
+                    </div>
+
+                    <button
+                      onClick={() => toggleExpand(index)}
+                      className="flex items-center gap-2 mt-4 text-[#72265F] hover:text-[#913e7c] font-medium transition-colors duration-200"
+                    >
+                      {item.isExpanded ? (
+                        <>
+                          <ChevronUp size={16} />
+                          <span>Show Less</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown size={16} />
+                          <span>Read More</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Jobs / Companies */}
+        {active === "jobs" && (
+          <div className="space-y-6">
+            {companies.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">💼</div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Job Opportunities Yet</h3>
+                <p className="text-gray-500">New opportunities will appear here</p>
+              </div>
+            ) : (
+              companies.map((company, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 group"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start justify-between">
+                      {/* Left: Logo and Details */}
+                      <div className="flex items-start gap-4">
+                        {/* Logo */}
+                        <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border-2 border-gray-200 p-2 group-hover:border-[#72265F] transition-colors duration-300">
+                          <img
+                            src={company.logo || "https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg"}
+                            alt={`${company.title} logo`}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+
+                        {/* Company Details */}
+                        <div className="flex-1">
+                          <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#72265F] transition-colors duration-300">
+                            {company.title}
+                          </h3>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <DollarSign size={16} className="text-green-600" />
+                              <span className="font-medium">CTC:</span>
+                              <span className="text-green-600 font-bold">{company.ctc}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <User size={16} className="text-blue-600" />
+                              <span className="font-medium">Role:</span>
+                              <span className="text-gray-800">{company.role}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-gray-600 md:col-span-2">
+                              <Building size={16} className="text-purple-600" />
+                              <span className="font-medium">Eligible Courses:</span>
+                              <span className="text-gray-800 text-sm">
+                                {Array.isArray(company.applicable_courses) 
+                                  ? company.applicable_courses.join(', ') 
+                                  : company.applicable_courses}
+                              </span>
+                            </div>
+
+                            {company.location && (
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <MapPin size={16} className="text-red-600" />
+                                <span className="font-medium">Location:</span>
+                                <span className="text-gray-800">{company.location}</span>
+                              </div>
+                            )}
+
+                            {company.job_type && (
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  company.job_type === 'Full-time' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : company.job_type === 'Internship'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-purple-100 text-purple-800'
+                                }`}>
+                                  {company.job_type}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* JD Link */}
+                          {company.JD && (
+                            <div className="mt-3">
+                              <a 
+                                href={company.JD} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[#72265F] hover:text-[#913e7c] text-sm font-medium"
+                              >
+                                <ExternalLink size={14} />
+                                View Job Description
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Apply Button */}
+                      <div className="flex-shrink-0 ml-4">
+                        <button
+                          className="bg-gradient-to-r from-[#72265F] to-[#913e7c] hover:from-[#913e7c] hover:to-[#72265F] text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#72265F] focus:ring-opacity-50"
+                          onClick={() => handleApplyClick()}
+                        >
+                          Apply Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#72265F] to-[#913e7c] p-6 rounded-t-2xl">
+              <h2 className="text-2xl font-bold text-white">Submit Application</h2>
+              <p className="text-white/80 mt-1">Complete your job application</p>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Resume Link Input */}
+              <div className="mb-6">
+                <label className="block mb-2 font-semibold text-gray-700">Resume Link</label>
+                <input
+                  type="url"
+                  value={resumeLink}
+                  onChange={(e) => setResumeLink(e.target.value)}
+                  placeholder="https://your-resume-link.com"
+                  className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-[#72265F] focus:ring focus:ring-[#72265F] focus:ring-opacity-20 transition-all duration-200"
+                />
+              </div>
+
+              {/* Declaration */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => setIsChecked(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-[#72265F] border-gray-300 rounded focus:ring-[#72265F]"
+                  />
+                  <div className="text-sm text-gray-700 leading-relaxed">
+                    <p className="font-medium mb-2">Declaration:</p>
+                    <p>
+                      I hereby declare that I will make myself available for all
+                      mandatory events related to the Placement Drive, including but
+                      not limited to the Pre-Placement Talk, Online Assessment, and
+                      Interview Rounds, as per the communicated schedule.
+                    </p>
+                    <p className="mt-2">
+                      In case of an unavoidable emergency, I shall inform the Placement
+                      Team in advance by sending a formal email with valid supporting
+                      documents to <strong className="text-[#72265F]">placements@cs.du.ac.in</strong>.
+                    </p>
+                    <p className="mt-2 text-red-600 font-medium">
+                      Failure to comply with this protocol may result in my being
+                      marked as a defaulter.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!isChecked || !resumeLink.trim()}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#72265F] to-[#913e7c] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  Submit Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default StudentHome;
