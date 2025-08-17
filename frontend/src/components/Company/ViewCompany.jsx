@@ -22,9 +22,12 @@ const ViewCompany = () => {
   const hasApplied =
     appliedLocal || company?.applied_students?.includes(userEmail);
 
-  const handleApply = async () => {
-    if (!userEmail || !company) return;
+    
 
+  const handleApply = async () => {
+      if (!userEmail || !company) return;
+      const student = await axios.get(`http://localhost:5000/student/${userEmail}`);
+        // continue
     setIsApplying(true);
     try {
       const response = await axios.put(
