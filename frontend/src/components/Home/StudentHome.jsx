@@ -81,7 +81,7 @@ const StudentHome = () => {
       </div>
 
       {/* Content Container */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-200 flex-1">
+      <div className="bg-white rounded-2xl border border-gray-200 flex-1">
         {/* Content Header */}
         <div className="px-6 py-4 border-b border-gray-200 rounded-t-2xl">
           <div className="flex items-center justify-between">
@@ -124,7 +124,7 @@ const StudentHome = () => {
                     announcements.map((item, index) => (
                       <div
                         key={index}
-                        className="bg-white rounded-xl shadow-sm hover:shadow-sm transition-all duration-300 border border-gray-100 overflow-hidden"
+                        className="bg-white rounded-xl hover:shadow-sm transition-all duration-300 border border-gray-100 overflow-hidden"
                       >
                         <div className="p-6">
                           <div className="flex items-start justify-between mb-4">
@@ -229,7 +229,7 @@ const StudentHome = () => {
                     companies.map((company, index) => (
                       <div
                         key={index}
-                        className="bg-white rounded-xl shadow-sm hover:shadow-sm transition-all duration-300 border border-gray-100 overflow-hidden group"
+                        className="bg-white rounded-xl hover:shadow-sm transition-all duration-300 border border-gray-100 overflow-hidden group"
                       >
                         <div className="p-6">
                           <div className="flex items-center justify-between">

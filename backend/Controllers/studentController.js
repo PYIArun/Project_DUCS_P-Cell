@@ -22,7 +22,7 @@ export const registerStudent = async (req, res) => {
       return res.status(404).json({ message: "Student not found." });
     }
 
-    // Keep all your existing fields exactly as before
+    // Extract all the new form fields
     const {
       email, // This is the form email — can be different from session email
       name,
@@ -33,25 +33,31 @@ export const registerStudent = async (req, res) => {
       alternatePhoneNumber,
       dob,
       gender,
-      course,
-      classRollNumber,
-      examRollNumberUG,
-      sgpa,
-      numBacklogs,
-      backlogDetails,
-      collegeName,
-      university,
-      examRollNumberPG,
-      cgpa,
-      yearOfPassingPG,
+      // PG Details
+      pgCourse,
+      pgClassRollNumber,
+      pgExamRollNumber,
+      pgCgpa,
+      pgNumBacklogs,
+      pgBacklogDetails,
+      // UG Details
+      ugCollegeName,
+      ugUniversity,
+      ugCourse,
+      ugExamRollNumber,
+      ugCgpa,
+      ugYearOfPassing,
+      // 12th Details
       board12,
       examRollNumber12,
       percentage12,
       yearOfPassing12,
+      // 10th Details
       board10,
       examRollNumber10,
       percentage10,
       yearOfPassing10,
+      // Documents
       resumeLink,
       marksheetDriveLink,
       placementConsent,
@@ -66,25 +72,31 @@ export const registerStudent = async (req, res) => {
       alternatePhoneNumber,
       dob,
       gender,
-      course,
-      classRollNumber,
-      examRollNumberUG,
-      sgpa,
-      numBacklogs,
-      backlogDetails,
-      collegeName,
-      university,
-      examRollNumberPG,
-      cgpa,
-      yearOfPassingPG,
+      // PG Details
+      pgCourse,
+      pgClassRollNumber,
+      pgExamRollNumber,
+      pgCgpa,
+      pgNumBacklogs,
+      pgBacklogDetails,
+      // UG Details
+      ugCollegeName,
+      ugUniversity,
+      ugCourse,
+      ugExamRollNumber,
+      ugCgpa,
+      ugYearOfPassing,
+      // 12th Details
       board12,
       examRollNumber12,
       percentage12,
       yearOfPassing12,
+      // 10th Details
       board10,
       examRollNumber10,
       percentage10,
       yearOfPassing10,
+      // Documents
       resumeLink,
       marksheetDriveLink,
       placementConsent,
@@ -112,8 +124,6 @@ export const registerStudent = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
-
-
 
 export const getStudentByEmail = async (req, res) => {
   try {
