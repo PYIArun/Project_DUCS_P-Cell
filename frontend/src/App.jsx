@@ -96,6 +96,14 @@ export default function App() {
           } 
         />
         <Route 
+          path="/company/:id" 
+          element={
+            <ProtectedRoute allowedRoles={["Student", "PlacementCoordinator"]}>
+              <CompanyProvider><ViewCompany /></CompanyProvider>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/placement-policy" 
           element={
             <ProtectedRoute allowedRoles={["Student", "PlacementCoordinator"]}>
