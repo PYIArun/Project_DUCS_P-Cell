@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +25,7 @@ const CreateCompany = () => {
         job_profile: '',
         ctc: '',
         description: '',
+        hiring_workflow: '',
         required_skills: '',
         additional_info: '',
         eligibility: '',
@@ -51,6 +52,7 @@ const CreateCompany = () => {
             setCompanies(response.data);
         } catch (error) {
             console.error('Error fetching companies:', error);
+            setError('Failed to fetch companies');
         }
     };
 
@@ -68,11 +70,16 @@ const CreateCompany = () => {
         try {
             const payload = {
                 ...formData,
-                required_skills: formData.required_skills.split(',').map((s) => s.trim()),
-                applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim())
+                required_skills: formData.required_skills.split(',').map((s) => s.trim()).filter(s => s.length > 0),
+                applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim()).filter(s => s.length > 0)
             };
-            console.log(payload);
-            await axios.post('http://localhost:5000/companies', payload);
+            
+            console.log('Sending payload:', payload);
+            
+            // Fixed: Use correct endpoint - /company instead of /companies
+            const response = await axios.post('http://localhost:5000/company', payload);
+            console.log('Response:', response.data);
+            
             setSuccess('✅ Company created successfully!');
             setFormData({
                 title: '',
@@ -93,7 +100,22 @@ const CreateCompany = () => {
             });
             fetchCompanies(); // Refresh the companies list
         } catch (err) {
-            setError('❌ Failed to create company. Please try again.');
+            console.error('Full error:', err);
+            console.error('Error response:', err.response?.data);
+            
+            let errorMessage = '❌ Failed to create company. ';
+            
+            if (err.response?.data?.errors) {
+                errorMessage += err.response.data.errors.join(', ');
+            } else if (err.response?.data?.message) {
+                errorMessage += err.response.data.message;
+            } else if (err.message) {
+                errorMessage += err.message;
+            } else {
+                errorMessage += 'Please try again.';
+            }
+            
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -105,11 +127,11 @@ const CreateCompany = () => {
             role: '',
             location: '',
             job_type: 'Full-time',
-            hiring_workflow : "",
             job_function: '',
             job_profile: '',
             ctc: '',
             description: '',
+            hiring_workflow: '',
             required_skills: '',
             additional_info: '',
             eligibility: '',
@@ -129,13 +151,27 @@ const CreateCompany = () => {
 
     const deleteCompany = async () => {
         try {
-            await axios.delete(`http://localhost:5000/companies/${deleteId}`);
+            // Fixed: Use correct endpoint - /company/:id instead of /companies/:id
+            await axios.delete(`http://localhost:5000/company/${deleteId}`);
             setCompanies(companies.filter(company => company._id !== deleteId));
             setShowModal(false);
+            setDeleteId(null); // Clear the deleteId
             setSuccess('✅ Company deleted successfully!');
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => {
+                setSuccess('');
+            }, 3000);
         } catch (error) {
             console.error('Error deleting company:', error);
             setError('❌ Failed to delete company.');
+            setShowModal(false);
+            setDeleteId(null);
+            
+            // Clear error message after 5 seconds
+            setTimeout(() => {
+                setError('');
+            }, 5000);
         }
     };
 
@@ -145,6 +181,16 @@ const CreateCompany = () => {
             [companyId]: !prev[companyId]
         }));
     };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setDropdownOpen({});
+        };
+        
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
     return (
         <div>
@@ -159,7 +205,7 @@ const CreateCompany = () => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid w-full items-center gap-4">
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="title">Company Title</Label>
+                                        <Label htmlFor="title">Company Title *</Label>
                                         <Input
                                             id="title"
                                             name="title"
@@ -171,7 +217,7 @@ const CreateCompany = () => {
                                     </div>
                                     
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="role">Role</Label>
+                                        <Label htmlFor="role">Role *</Label>
                                         <Input
                                             id="role"
                                             name="role"
@@ -183,7 +229,7 @@ const CreateCompany = () => {
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="location">Location</Label>
+                                        <Label htmlFor="location">Location *</Label>
                                         <Input
                                             id="location"
                                             name="location"
@@ -195,23 +241,46 @@ const CreateCompany = () => {
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="job_type">Job Type</Label>
+                                        <Label htmlFor="job_type">Job Type *</Label>
                                         <select
                                             id="job_type"
                                             name="job_type"
                                             value={formData.job_type}
                                             onChange={handleChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            required
                                         >
                                             <option value="Full-time">Full-time</option>
                                             <option value="Remote">Remote</option>
-                                            <option value="Intership + full-time">Internship + full-time</option>
+                                            <option value="Internship + full-time">Internship + full-time</option>
                                             <option value="Internship">Internship</option>
                                         </select>
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="ctc">CTC</Label>
+                                        <Label htmlFor="job_function">Job Function</Label>
+                                        <Input
+                                            id="job_function"
+                                            name="job_function"
+                                            value={formData.job_function}
+                                            onChange={handleChange}
+                                            placeholder="e.g., Software Development, Data Science"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="job_profile">Job Profile</Label>
+                                        <Input
+                                            id="job_profile"
+                                            name="job_profile"
+                                            value={formData.job_profile}
+                                            onChange={handleChange}
+                                            placeholder="Job profile description"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="ctc">CTC *</Label>
                                         <Input
                                             id="ctc"
                                             name="ctc"
@@ -223,7 +292,7 @@ const CreateCompany = () => {
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="description">Description</Label>
+                                        <Label htmlFor="description">Description *</Label>
                                         <Textarea
                                             id="description"
                                             name="description"
@@ -234,6 +303,7 @@ const CreateCompany = () => {
                                             required
                                         />
                                     </div>
+
                                     <div className="flex flex-col space-y-1.5">
                                         <Label htmlFor="hiring_workflow">Hiring Workflow</Label>
                                         <Textarea
@@ -241,14 +311,13 @@ const CreateCompany = () => {
                                             name="hiring_workflow"
                                             value={formData.hiring_workflow}
                                             onChange={handleChange}
-                                            placeholder="Hiring workflow"
-                                            rows={4}
-                                            required
+                                            placeholder="Hiring workflow (e.g., Online Test → Technical Interview → HR Round)"
+                                            rows={3}
                                         />
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="required_skills">Required Skills (comma-separated)</Label>
+                                        <Label htmlFor="required_skills">Required Skills (comma-separated) *</Label>
                                         <Input
                                             id="required_skills"
                                             name="required_skills"
@@ -260,26 +329,38 @@ const CreateCompany = () => {
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="applicable_courses">Applicable Courses (comma-separated)</Label>
+                                        <Label htmlFor="applicable_courses">Applicable Courses (comma-separated) *</Label>
                                         <Input
                                             id="applicable_courses"
                                             name="applicable_courses"
                                             value={formData.applicable_courses}
                                             onChange={handleChange}
-                                            placeholder="e.g., B.Tech CSE, MCA, M.Sc CS"
+                                            placeholder="e.g., MCA, MSc"
                                             required
                                         />
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="eligibility">Eligibility</Label>
+                                        <Label htmlFor="eligibility">Eligibility *</Label>
                                         <Input
                                             id="eligibility"
                                             name="eligibility"
                                             value={formData.eligibility}
                                             onChange={handleChange}
-                                            placeholder="Eligibility criteria"
+                                            placeholder="Eligibility criteria (e.g., CGPA > 7.0, No backlogs)"
                                             required
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="additional_info">Additional Information</Label>
+                                        <Textarea
+                                            id="additional_info"
+                                            name="additional_info"
+                                            value={formData.additional_info}
+                                            onChange={handleChange}
+                                            placeholder="Any additional information about the job"
+                                            rows={3}
                                         />
                                     </div>
 
@@ -312,6 +393,7 @@ const CreateCompany = () => {
                                 type="button"
                                 onClick={handleCancel}
                                 className='select-none font-instrument px-[1.25rem] py-[0.5rem] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] text-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold rounded-[0.5rem]'
+                                variant="outline"
                             >
                                 Cancel
                             </Button>
@@ -325,7 +407,7 @@ const CreateCompany = () => {
                         </CardFooter>
                         
                         {success && <p className="mt-4 px-6 pb-4 text-green-600 font-medium">{success}</p>}
-                        {error && <p className="mt-4 px-6 pb-4 text-red-600 font-medium">{error}</p>}
+                        {error && <p className="mt-4 px-6 pb-4 text-red-600 font-medium text-sm">{error}</p>}
                     </Card>
                 </div>
 
@@ -345,7 +427,10 @@ const CreateCompany = () => {
                                         {/* Three dots menu */}
                                         <div className="absolute top-2 right-2">
                                             <button
-                                                onClick={() => toggleDropdown(company._id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleDropdown(company._id);
+                                                }}
                                                 className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                                             >
                                                 <MdMoreVert className="text-gray-500 text-lg" />
@@ -353,7 +438,10 @@ const CreateCompany = () => {
                                             {dropdownOpen[company._id] && (
                                                 <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[120px]">
                                                     <button
-                                                        onClick={() => confirmDelete(company._id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            confirmDelete(company._id);
+                                                        }}
                                                         className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 flex items-center gap-2"
                                                     >
                                                         <MdDelete className="text-sm" />
@@ -385,7 +473,6 @@ const CreateCompany = () => {
                                         <button
                                             className="bg-[#913e7c] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#72265F] transition-all mr-8"
                                             onClick={() => {
-                                                // Handle view details - you can implement this later
                                                 navigate(`/company/${company._id}`)
                                             }}
                                         >
@@ -413,7 +500,10 @@ const CreateCompany = () => {
                                 Yes
                             </Button>
                             <Button 
-                                onClick={() => setShowModal(false)} 
+                                onClick={() => {
+                                    setShowModal(false);
+                                    setDeleteId(null);
+                                }} 
                                 className="rounded-[0.7rem] active:scale-105 transition-all ease-in"
                             >
                                 No
