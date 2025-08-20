@@ -18,7 +18,20 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    applied_students: [],
+    applied_students: [{
+        email: {
+            type: String,
+            required: true
+        },
+        resumeLink: {
+            type: String,
+            required: true
+        },
+        appliedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     job_type: {
         type: String,
         enum: ['Full-time', 'Remote' , 'Internship', 'Intership + full-time'],

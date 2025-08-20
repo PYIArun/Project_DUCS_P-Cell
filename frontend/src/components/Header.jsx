@@ -32,7 +32,7 @@ const Header = () => {
       >
         <div className="flex justify-start">
           <img
-            src="./images/du_logo.png"
+            src="/images/du_logo.png"
             className="w-[90%] max-w-[100px] md:max-w-[120px] mobile:w-[70%]"
             alt="DU Logo"
           />

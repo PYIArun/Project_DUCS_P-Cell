@@ -43,7 +43,7 @@ export const createCompany = async (req, res) => {
 export const getAllCompanies = async (req, res) => {
   try {
     console.log("Fetching all companies");
-    const companies = await Company.find().populate('applied_students');
+    const companies = await Company.find();
     res.status(200).json(companies);
   } catch (error) {
     console.error("Error fetching companies:", error);
@@ -54,7 +54,7 @@ export const getAllCompanies = async (req, res) => {
 // READ a single company by ID
 export const getCompanyById = async (req, res) => {
   try {
-    const company = await Company.findById(req.params.id).populate('applied_students');
+    const company = await Company.findById(req.params.id);
     if (!company) return res.status(404).json({ message: 'Company not found' });
     res.status(200).json(company);
   } catch (error) {
@@ -63,30 +63,65 @@ export const getCompanyById = async (req, res) => {
   }
 };
 
-// UPDATE a company by ID
+// UPDATE a company by ID (Apply for job)
 export const updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    const { email } = req.body;
+    const { email, resumeLink } = req.body;
+    
+    // Validate required fields
+    if (!email || !resumeLink) {
+      return res.status(400).json({ 
+        message: 'Email and resume link are required' 
+      });
+    }
+
     const company = await Company.findById(id);
     if (!company) {
       return res.status(404).json({ message: 'Company not found' });
     }
-    if (company.applied_students.includes(email)) {
-      return res.status(400).json({ message: 'Student has already applied to this company' });
+
+    // Check if student has already applied
+    const hasAlreadyApplied = company.applied_students.some(
+      student => student.email === email
+    );
+
+    if (hasAlreadyApplied) {
+      return res.status(400).json({ 
+        message: 'Student has already applied to this company' 
+      });
     }
 
-    // Push student email to applied_students array
+    // Push student application (email + resume link) to applied_students array
     const updatedCompany = await Company.findByIdAndUpdate(
       id,
-      { $push: { applied_students: email } }, // $push adds email to array
+      { 
+        $push: { 
+          applied_students: {
+            email: email,
+            resumeLink: resumeLink,
+            appliedAt: new Date()
+          }
+        } 
+      },
       { new: true, runValidators: true }
     );
-    if (!updatedCompany) return res.status(404).json({ message: 'Company not found' });
-    res.status(200).json(updatedCompany);
+
+    if (!updatedCompany) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    res.status(200).json({
+      message: 'Application submitted successfully',
+      company: updatedCompany
+    });
+
   } catch (error) {
     console.error("Error updating company:", error);
-    res.status(400).json({ message: 'Error updating company', error: error.message });
+    res.status(400).json({ 
+      message: 'Error updating company', 
+      error: error.message 
+    });
   }
 };
 
@@ -99,5 +134,32 @@ export const deleteCompany = async (req, res) => {
   } catch (error) {
     console.error("Error deleting company:", error);
     res.status(500).json({ message: 'Error deleting company', error: error.message });
+  }
+};
+
+// GET applied students for a specific company
+export const getAppliedStudents = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const company = await Company.findById(id).select('applied_students title role');
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    res.status(200).json({
+      company: {
+        title: company.title,
+        role: company.role
+      },
+      applied_students: company.applied_students
+    });
+
+  } catch (error) {
+    console.error("Error fetching applied students:", error);
+    res.status(500).json({ 
+      message: 'Error fetching applied students', 
+      error: error.message 
+    });
   }
 };
