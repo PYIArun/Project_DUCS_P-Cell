@@ -27,11 +27,12 @@ const CreateCompany = () => {
         description: '',
         hiring_workflow: '',
         required_skills: '',
-        additional_info: '',
+        additional_info: '',    
         eligibility: '',
         applicable_courses: '',
         logo: '',
-        JD: ''
+        JD: '',
+        application_deadline: ''
     });
 
     const [companies, setCompanies] = useState([]);
@@ -71,7 +72,9 @@ const CreateCompany = () => {
             const payload = {
                 ...formData,
                 required_skills: formData.required_skills.split(',').map((s) => s.trim()).filter(s => s.length > 0),
-                applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim()).filter(s => s.length > 0)
+                applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim()).filter(s => s.length > 0),
+                // Convert empty string to null for optional deadline
+                application_deadline: formData.application_deadline ? new Date(formData.application_deadline) : null
             };
             
             console.log('Sending payload:', payload);
@@ -96,7 +99,8 @@ const CreateCompany = () => {
                 eligibility: '',
                 applicable_courses: '',
                 logo: '',
-                JD: ''
+                JD: '',
+                application_deadline: ''
             });
             fetchCompanies(); // Refresh the companies list
         } catch (err) {
@@ -137,7 +141,8 @@ const CreateCompany = () => {
             eligibility: '',
             applicable_courses: '',
             logo: '',
-            JD: ''
+            JD: '',
+            application_deadline: ''
         });
         setSuccess('');
         setError('');
@@ -191,6 +196,23 @@ const CreateCompany = () => {
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
+
+    // Helper function to format date for display
+    const formatDate = (dateString) => {
+        if (!dateString) return 'No deadline';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
+
+    // Helper function to check if deadline has passed
+    const isDeadlinePassed = (dateString) => {
+        if (!dateString) return false;
+        return new Date(dateString) < new Date();
+    };
 
     return (
         <div>
@@ -289,6 +311,20 @@ const CreateCompany = () => {
                                             placeholder="CTC (e.g., 12 LPA)"
                                             required
                                         />
+                                    </div>
+
+                                    {/* Application Deadline Field */}
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="application_deadline">Application Deadline</Label>
+                                        <Input
+                                            id="application_deadline"
+                                            name="application_deadline"
+                                            type="datetime-local"
+                                            value={formData.application_deadline}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+                                        <p className="text-sm text-gray-500">Leave empty for no deadline</p>
                                     </div>
 
                                     <div className="flex flex-col space-y-1.5">
@@ -466,6 +502,13 @@ const CreateCompany = () => {
                                                 <p className="text-gray-700 text-sm"><strong>CTC:</strong> {company.ctc}</p>
                                                 <p className="text-gray-700 text-sm"><strong>Role:</strong> {company.role}</p>
                                                 <p className="text-gray-700 text-sm"><strong>Applicable Courses:</strong> {Array.isArray(company.applicable_courses) ? company.applicable_courses.join(', ') : company.applicable_courses}</p>
+                                                {/* Show deadline status */}
+                                                <p className={`text-sm font-medium ${isDeadlinePassed(company.application_deadline) ? 'text-red-600' : 'text-green-600'}`}>
+                                                    <strong>Deadline:</strong> {formatDate(company.application_deadline)}
+                                                    {isDeadlinePassed(company.application_deadline) && company.application_deadline && (
+                                                        <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">Expired</span>
+                                                    )}
+                                                </p>
                                             </div>
                                         </div>
 

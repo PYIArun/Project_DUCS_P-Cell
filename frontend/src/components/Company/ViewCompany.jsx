@@ -5,12 +5,16 @@ import { useAuth } from "../../context/AuthContext";
 
 const ViewCompany = () => {
   const { company, setCompany } = useCompany();
-  const { userEmail } = useAuth();
+  const { userEmail, role } = useAuth();
 
   const [activeTab, setActiveTab] = useState("job");
   const [isApplying, setIsApplying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Applied students data
+  const [appliedStudents, setAppliedStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
 
   // Popup states
   const [showPopup, setShowPopup] = useState(false);
@@ -44,6 +48,82 @@ const ViewCompany = () => {
 
     fetchCompany();
   }, [company, setCompany]);
+
+  // Fetch applied students data when Applied Students tab is active
+  const fetchAppliedStudents = async () => {
+    if (!company?._id) return;
+    
+    setStudentsLoading(true);
+    setError(""); // Clear any previous errors
+    
+    try {
+      // First try the dedicated endpoint
+      let appliedData;
+      try {
+        const response = await axios.get(`http://localhost:5000/company/${company._id}/applied-students`);
+        appliedData = response.data.applied_students;
+        console.log("Fetched applied students from dedicated endpoint:", appliedData);
+      } catch (endpointError) {
+        console.log("Dedicated endpoint failed, using company data:", endpointError.message);
+        // Fallback to using the company data directly
+        appliedData = company.applied_students || [];
+      }
+      
+      if (!appliedData || appliedData.length === 0) {
+        console.log("No applied students found");
+        setAppliedStudents([]);
+        return;
+      }
+      
+      // Fetch detailed student information for each applied student
+      console.log("Fetching student details for", appliedData.length, "applications");
+      const studentsWithDetails = await Promise.all(
+        appliedData.map(async (application) => {
+          try {
+            console.log(`Fetching student details for: ${application.email}`);
+            const studentResponse = await axios.get(`http://localhost:5000/student/${application.email}`);
+            console.log(`Student details fetched for ${application.email}:`, studentResponse.data);
+            return {
+              ...application,
+              studentDetails: studentResponse.data
+            };
+          } catch (error) {
+            console.error(`Error fetching details for ${application.email}:`, error.message);
+            return {
+              ...application,
+              studentDetails: null
+            };
+          }
+        })
+      );
+      
+      console.log("All students with details:", studentsWithDetails);
+      setAppliedStudents(studentsWithDetails);
+      
+    } catch (error) {
+      console.error("Error in fetchAppliedStudents:", error);
+      setError(`Failed to load applied students data: ${error.message}`);
+      // Fallback to company data if everything fails
+      if (company.applied_students && company.applied_students.length > 0) {
+        const fallbackData = company.applied_students.map(app => ({
+          ...app,
+          studentDetails: null
+        }));
+        setAppliedStudents(fallbackData);
+      }
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  // Fetch applied students when tab becomes active
+  useEffect(() => {
+    console.log("Applied students tab effect triggered", { activeTab, companyId: company?._id });
+    if (activeTab === "applied" && company?._id) {
+      console.log("Fetching applied students...");
+      fetchAppliedStudents();
+    }
+  }, [activeTab, company?._id]);
 
   const handleApply = async () => {
     if (!userEmail || !company) {
@@ -110,6 +190,176 @@ const ViewCompany = () => {
     setError("");
   };
 
+  const renderAppliedStudentsTable = () => {
+    if (studentsLoading) {
+      return (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading applied students...</span>
+        </div>
+      );
+    }
+
+    if (appliedStudents.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No students have applied yet.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+          <thead className="bg-gray-50">
+            <tr>
+              {role === "Student" ? (
+                // Student view - limited columns
+                <>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Full Name
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    PG Course
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Status
+                  </th>
+                </>
+              ) : (
+                // Placement Coordinator view - all columns
+                <>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Email
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Gender
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Full Name
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    PG Course
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    PG CGPA
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    UG Course
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    UG CGPA
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    12th %
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    10th %
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Resume
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    Status
+                  </th>
+                </>
+              )}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {appliedStudents.map((application, index) => {
+              const student = application.studentDetails;
+              return (
+                <tr key={index} className="hover:bg-gray-50">
+                  {role === "Student" ? (
+                    // Student view
+                    <>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {application.email}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.name || "N/A"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.pgCourse || "N/A"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          application.status 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {application.status || "Applied"}
+                        </span>
+                      </td>
+                    </>
+                  ) : (
+                    // Placement Coordinator view
+                    <>
+                      <td className="px-3 py-4 text-sm text-gray-900">
+                        <div className="break-all">{application.email}</div>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.gender || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.name || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.pgCourse || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.pgCgpa || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.ugCourse || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.ugCgpa || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.percentage12 || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {student?.percentage10 || "N/A"}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm">
+                        {application.resumeLink ? (
+                          <a 
+                            href={application.resumeLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                          >
+                            Link
+                          </a>
+                        ) : (
+                          <span className="text-gray-400">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          application.status 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {application.status || "Applied"}
+                        </span>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -138,7 +388,7 @@ const ViewCompany = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white min-h-screen">
+    <div className="max-w-7xl mx-auto p-6 bg-white min-h-screen">
       {/* Header Section */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-start gap-6">
@@ -211,10 +461,10 @@ const ViewCompany = () => {
 
       {/* Tabs */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 overflow-x-auto">
           <button
             onClick={() => setActiveTab("job")}
-            className={`px-6 py-4 font-medium text-sm transition-colors ${
+            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
               activeTab === "job"
                 ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
@@ -224,7 +474,7 @@ const ViewCompany = () => {
           </button>
           <button
             onClick={() => setActiveTab("workflow")}
-            className={`px-6 py-4 font-medium text-sm transition-colors ${
+            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
               activeTab === "workflow"
                 ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
@@ -234,13 +484,23 @@ const ViewCompany = () => {
           </button>
           <button
             onClick={() => setActiveTab("eligibility")}
-            className={`px-6 py-4 font-medium text-sm transition-colors ${
+            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
               activeTab === "eligibility"
                 ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
             }`}
           >
             Eligibility
+          </button>
+          <button
+            onClick={() => setActiveTab("applied")}
+            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
+              activeTab === "applied"
+                ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Applied Students ({company.applied_students?.length || 0})
           </button>
         </div>
 
@@ -326,6 +586,31 @@ const ViewCompany = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "applied" && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Applied Students ({appliedStudents.length})
+                </h3>
+                <button
+                  onClick={fetchAppliedStudents}
+                  className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                  disabled={studentsLoading}
+                >
+                  {studentsLoading ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+              
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
+
+              {renderAppliedStudentsTable()}
             </div>
           )}
         </div>

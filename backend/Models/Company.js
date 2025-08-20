@@ -30,6 +30,10 @@ const CompanySchema = new mongoose.Schema({
         appliedAt: {
             type: Date,
             default: Date.now
+        },
+        status: {
+            type: String,
+            default: 'Applied'
         }
     }],
     job_type: {
@@ -76,6 +80,10 @@ const CompanySchema = new mongoose.Schema({
     JD : {
         type: String,
         required: true
+    },
+    application_deadline: {
+        type: Date,
+        required: false
     },
     created_at: {
         type: Date,
