@@ -2,6 +2,7 @@ import express from "express";
 import { registerRecruiter, loginRecruiter, getRecruiterByEmail } 
   from "../Controllers/recruiterController.js";
 
+  import '../Middlewares/verifyRecruiter.js'
 const router = express.Router();
 
 router.post("/recruiter/register", registerRecruiter);

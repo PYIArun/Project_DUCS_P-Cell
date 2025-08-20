@@ -21,6 +21,10 @@ import CoordinatorRoute from './components/ProtectedRoute/CoordinatorRoute.jsx';
 import StudentRoute from './components/ProtectedRoute/StudentRoute.jsx';
 import { CompanyProvider } from './context/CompanyContext.jsx';
 
+
+import RecruiterRoute from './components/ProtectedRoute/RecruiterRoute.jsx';
+import RecruiterHome from './components/Recruiter/RecruiterHome.jsx';
+
 export default function App() {
   return (
     <AuthProvider>
@@ -41,78 +45,88 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Login />} />
-        
+
         {/* Student-only Routes */}
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             <StudentRoute requireRegistration={false}>
               <Register />
             </StudentRoute>
-          } 
+          }
         />
-        <Route 
-          path="/edit-profile" 
+        <Route
+          path="/edit-profile"
           element={
             <StudentRoute>
               <EditProfile />
             </StudentRoute>
-          } 
+          }
         />
-        
+
         {/* Coordinator-only Routes */}
-        <Route 
-          path="/create-highlights" 
+        <Route
+          path="/create-highlights"
           element={
             <CoordinatorRoute>
               <CreateHighlight />
             </CoordinatorRoute>
-          } 
+          }
         />
-        <Route 
-          path="/create-job-announcements" 
+        <Route
+          path="/create-job-announcements"
           element={
             <CoordinatorRoute>
               <CreateCompanyForm />
             </CoordinatorRoute>
-          } 
+          }
         />
-        <Route 
-          path="/create-announcements" 
+        <Route
+          path="/create-announcements"
           element={
             <CoordinatorRoute>
               <CreateAnnouncement />
             </CoordinatorRoute>
-          } 
+          }
         />
-        
+
         {/* Routes for both Students and Coordinators */}
-        <Route 
-          path="/studentHome" 
+        <Route
+          path="/studentHome"
           element={
             <ProtectedRoute allowedRoles={["Student", "PlacementCoordinator"]}>
               <StudentHome />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/company/:id" 
+        <Route
+          path="/company/:id"
           element={
             <ProtectedRoute allowedRoles={["Student", "PlacementCoordinator"]}>
               <CompanyProvider><ViewCompany /></CompanyProvider>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/placement-policy" 
+        <Route
+          path="/placement-policy"
           element={
             <ProtectedRoute allowedRoles={["Student", "PlacementCoordinator"]}>
               <PlacementPolicy />
             </ProtectedRoute>
-          } 
+          }
+        />
+        
+    {/* Recruiter-only Route */}
+        <Route
+          path="/recruiter/home"
+          element={
+            <RecruiterRoute>
+              <RecruiterHome />
+            </RecruiterRoute>
+          }
         />
       </Routes>
-      <Footer/>
+      <Footer />
     </AuthProvider>
   );
 }

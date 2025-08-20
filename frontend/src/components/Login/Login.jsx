@@ -1,35 +1,84 @@
 // Login.js - Updated to use Auth Context
-import React from 'react';
+import { useState } from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import app from './Firebase';
 import { toast, Bounce } from 'react-toastify';
 import axios from 'axios';
-import moment from 'moment';
 import 'react-toastify/dist/ReactToastify.css';
 import { FcGoogle } from "react-icons/fc";
 
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from "@/components/ui/tabs"
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth(); 
+    const { login } = useAuth();
+
+    const [loginEmail, setLoginEmail] = useState("LODArun24@cs.du.ac.in");
+    const [loginPassword, setLoginPassword] = useState("kyachedabhosedi");
+
+    // States for Register
+    const [regEmail, setRegEmail] = useState("LODArun24@cs.du.ac.in");
+    const [regCompanyName, setRegCompanyName] = useState("randi.com");
+    const [regPassword, setRegPassword] = useState("kyachedabhosedi");
+    const [regConfirmPassword, setRegConfirmPassword] = useState("kyachedabhosedi");
+
+    // Login handler
+    // Login handler
+    const handleLogin = async () => {
+        try {
+            const res = await axios.post("http://localhost:5000/recruiter/login", {
+                email: loginEmail,
+                password: loginPassword,
+            });
+
+            // ✅ Save JWT token in sessionStorage
+            sessionStorage.setItem("recruiterToken", res.data.token);
+
+            alert(res.data.message || "Login successful");
+            navigate("/recruiter/home");
+        } catch (err) {
+            alert(err.response?.data?.message || "Login failed");
+        }
+    };
+
+    // Register handler
+    const handleRegister = async () => {
+        if (regPassword !== regConfirmPassword) {
+            return alert("Passwords do not match!");
+        }
+        try {
+            const res = await axios.post("http://localhost:5000/recruiter/register", {
+                email: regEmail,
+                companyName: regCompanyName,
+                password: regPassword,
+            });
+
+            // ✅ Save JWT token in sessionStorage
+            sessionStorage.setItem("recruiterToken", res.data.token);
+
+            alert(res.data.message || "Registration successful");
+            navigate("/recruiter/home");
+        } catch (err) {
+            alert(err.response?.data?.message || "Registration failed");
+        }
+    };
+
 
     const googleLogin = async () => {
         try {
@@ -47,14 +96,14 @@ const Login = () => {
                 position: "bottom-center",
                 autoClose: 3000,
                 theme: "light",
-                transition: Bounce,         
+                transition: Bounce,
             });
 
             // Check if student is registered and navigate accordingly
             if (student.registered === "no") {
                 navigate("/register"); // Redirect to registration page
             } else {
-                navigate("/studentHome"); 
+                navigate("/studentHome");
             }
 
         } catch (error) {
@@ -65,33 +114,33 @@ const Login = () => {
                 const { status, data } = error.response;
 
                 if (status === 403 || status === 400) {
-                    toast.error(data.message, { 
-                        position: "bottom-center", 
-                        autoClose: 5000, 
-                        theme: "light", 
-                        transition: Bounce 
+                    toast.error(data.message, {
+                        position: "bottom-center",
+                        autoClose: 5000,
+                        theme: "light",
+                        transition: Bounce
                     });
                 } else if (status === 404) {
-                    toast.error("Student not found.", { 
-                        position: "bottom-center", 
-                        autoClose: 5000, 
-                        theme: "light", 
-                        transition: Bounce 
+                    toast.error("Student not found.", {
+                        position: "bottom-center",
+                        autoClose: 5000,
+                        theme: "light",
+                        transition: Bounce
                     });
                 } else {
-                    toast.error("Something went wrong. Please try again.", { 
-                        position: "bottom-center", 
-                        autoClose: 5000, 
-                        theme: "light", 
-                        transition: Bounce 
+                    toast.error("Something went wrong. Please try again.", {
+                        position: "bottom-center",
+                        autoClose: 5000,
+                        theme: "light",
+                        transition: Bounce
                     });
                 }
             } else {
-                toast.error("Network error. Please check your connection.", { 
-                    position: "bottom-center", 
-                    autoClose: 5000, 
-                    theme: "light", 
-                    transition: Bounce 
+                toast.error("Network error. Please check your connection.", {
+                    position: "bottom-center",
+                    autoClose: 5000,
+                    theme: "light",
+                    transition: Bounce
                 });
             }
         }
@@ -194,24 +243,24 @@ const Login = () => {
                     </TabsList>
                     <TabsContent value="student" >
                         <Card className='rounded-[0.5rem]' >
-                        <CardHeader>
-                            <CardTitle>Student Login</CardTitle>
-                            <CardDescription>
-                            Login with your official Student ID.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                        <button
-                                onClick={googleLogin}
-                                className="flex border bg-card text-card-foreground shadow-md gap-[0.7rem] font-sans items-center justify-center text-black p-3 rounded-full w-56 active:transform-scale-105 transition-colors"
-                            >
-                                <FcGoogle />
-                                Continue with Google
-                            </button>
-                        </CardContent>
-                        <CardFooter>
-                            <h4 className='text-[0.9rem]'>Having Troubles?<a className='font-semibold cursor-pointer' href='mailto:placements@cs.du.ac.in'>  Mail to Us</a></h4>
-                        </CardFooter>
+                            <CardHeader>
+                                <CardTitle>Student Login</CardTitle>
+                                <CardDescription>
+                                    Login with your official Student ID.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                <button
+                                    onClick={googleLogin}
+                                    className="flex border bg-card text-card-foreground shadow-md gap-[0.7rem] font-sans items-center justify-center text-black p-3 rounded-full w-56 active:transform-scale-105 transition-colors"
+                                >
+                                    <FcGoogle />
+                                    Continue with Google
+                                </button>
+                            </CardContent>
+                            <CardFooter>
+                                <h4 className='text-[0.9rem]'>Having Troubles?<a className='font-semibold cursor-pointer' href='mailto:placements@cs.du.ac.in'>  Mail to Us</a></h4>
+                            </CardFooter>
                         </Card>
                     </TabsContent>
                     <TabsContent value="recruiter">
@@ -220,73 +269,105 @@ const Login = () => {
                                 <TabsTrigger value="recruiter_login">Login</TabsTrigger>
                                 <TabsTrigger value="recruiter_register">Register</TabsTrigger>
                             </TabsList>
+
+                            {/* LOGIN */}
                             <TabsContent value="recruiter_login">
-                                <Card className='rounded-[0.5rem]'>
-                                <CardHeader>
-                                    <CardTitle>Login</CardTitle>
-                                    <CardDescription>
-                                    To login, you must register yourself once.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    <div className="space-y-1">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type='email' defaultValue="" />
-                                    </div>
-                                    <div className="space-y-1">
-                                    <Label htmlFor="password">Password</Label>
-                                    <Input id="password" type='password' />
-                                    </div>
-                                </CardContent>
-                                    
-                                <CardFooter>
-                                    <Button className='select-none font-instrument px-[1.25rem] py-[0.5rem] bg-[#72265F] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold text-white rounded-[0.5rem]'>Login</Button>
-                                </CardFooter>
+                                <Card className="rounded-[0.5rem]">
+                                    <CardHeader>
+                                        <CardTitle>Login</CardTitle>
+                                        <CardDescription>To login, you must register yourself once.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="login_email">Email</Label>
+                                            <Input
+                                                id="login_email"
+                                                type="email"
+                                                value={loginEmail}
+                                                onChange={(e) => setLoginEmail(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="login_password">Password</Label>
+                                            <Input
+                                                id="login_password"
+                                                type="password"
+                                                value={loginPassword}
+                                                onChange={(e) => setLoginPassword(e.target.value)}
+                                            />
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter>
+                                        <Button onClick={handleLogin} className="px-[1.25rem] py-[0.5rem] bg-[#72265F] text-white rounded-[0.5rem] hover:bg-[#602050] active:scale-95 transition">
+                                            Login
+                                        </Button>
+                                    </CardFooter>
                                 </Card>
                             </TabsContent>
+
+                            {/* REGISTER */}
                             <TabsContent value="recruiter_register">
-                                <Card className='rounded-[0.5rem]'>
-                                <CardHeader>
-                                    <CardTitle>Register</CardTitle>
-                                    <CardDescription>
-                                    Create an account to get started. 
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    <div className="space-y-1">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type='email' defaultValue="" />
-                                    </div>
-                                    <div className="space-y-1">
-                                    <Label htmlFor="companyname">Company Name</Label>
-                                    <Input id="companyname" defaultValue="" />
-                                    </div>
-                                    <div className="space-y-1">
-                                    <Label htmlFor="createpassword">Create new password</Label>
-                                    <Input id="createpassword" type="password" />
-                                    </div>
-                                    <div className="space-y-1">
-                                    <Label htmlFor="confirmpassword">Confirm new password</Label>
-                                    <Input id="confirmpassword" type="password" />
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                 <Button className='select-none font-instrument px-[1.25rem] py-[0.5rem] bg-[#72265F] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold text-white rounded-[0.5rem]'>Register</Button>
-                                </CardFooter>
+                                <Card className="rounded-[0.5rem]">
+                                    <CardHeader>
+                                        <CardTitle>Register</CardTitle>
+                                        <CardDescription>Create an account to get started.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="reg_email">Email</Label>
+                                            <Input
+                                                id="reg_email"
+                                                type="email"
+                                                value={regEmail}
+                                                onChange={(e) => setRegEmail(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="reg_company">Company Name</Label>
+                                            <Input
+                                                id="reg_company"
+                                                value={regCompanyName}
+                                                onChange={(e) => setRegCompanyName(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="reg_password">Create new password</Label>
+                                            <Input
+                                                id="reg_password"
+                                                type="password"
+                                                value={regPassword}
+                                                onChange={(e) => setRegPassword(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="reg_confirm">Confirm new password</Label>
+                                            <Input
+                                                id="reg_confirm"
+                                                type="password"
+                                                value={regConfirmPassword}
+                                                onChange={(e) => setRegConfirmPassword(e.target.value)}
+                                            />
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter>
+                                        <Button onClick={handleRegister} className="px-[1.25rem] py-[0.5rem] bg-[#72265F] text-white rounded-[0.5rem] hover:bg-[#602050] active:scale-95 transition">
+                                            Register
+                                        </Button>
+                                    </CardFooter>
                                 </Card>
                             </TabsContent>
                         </Tabs>
                     </TabsContent>
                     <TabsContent value="coordinator">
-                    <Card className='rounded-[0.5rem]'>
+                        <Card className='rounded-[0.5rem]'>
                             <CardHeader>
                                 <CardTitle>Placement Coordinator Login</CardTitle>
                                 <CardDescription>
-                                Login with your official Student ID.
+                                    Login with your official Student ID.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                            <button
+                                <button
                                     onClick={googleLoginCoordinator}
                                     className="flex border bg-card text-card-foreground shadow-md gap-[0.7rem] font-sans items-center justify-center text-black p-3 rounded-full w-56 active:transform-scale-105 transition-colors"
                                 >
@@ -297,7 +378,7 @@ const Login = () => {
                             <CardFooter>
                                 <h4 className='text-[0.9rem]'>Having Troubles?<a className='font-semibold cursor-pointer' href='mailto:placements@cs.du.ac.in'>  Mail to Us</a></h4>
                             </CardFooter>
-                            </Card>
+                        </Card>
                     </TabsContent>
                 </Tabs>
             </div>
