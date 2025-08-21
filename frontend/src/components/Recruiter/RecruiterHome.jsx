@@ -16,7 +16,7 @@ const RecruiterHome = () => {
 
   useEffect(() => {
     if (!recruiterId) {
-      navigate('/login');
+      // navigate('/login');
       return;
     }
     fetchJAFs();
@@ -187,14 +187,6 @@ const RecruiterHome = () => {
                           className="text-[#72265F] border-[#72265F] hover:bg-[#72265F] hover:text-white"
                         >
                           <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditJAF(jaf._id)}
-                          className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
-                        >
-                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"

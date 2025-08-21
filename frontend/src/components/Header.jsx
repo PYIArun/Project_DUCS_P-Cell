@@ -13,7 +13,7 @@ import {
 import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star, Building, Briefcase } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from ".././context/AuthContext"; 
-
+import { Eye, Edit } from 'lucide-react';
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -152,7 +152,7 @@ const Header = () => {
                   </>
                 )}
 
-                {/* Recruiter Options */}
+            {/* Recruiter Options */}
                 {role === "Recruiter" && (
                   <>
                     <DropdownMenuItem
@@ -163,13 +163,16 @@ const Header = () => {
                       <span>Recruiter Home</span>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                      onClick={() => navigate("/recruiter/complete-profile")}
-                      className="hover:bg-[#f3e8f5] cursor-pointer"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Complete Profile</span>
-                    </DropdownMenuItem>
+                    {/* Only show Complete Profile if not completed yet */}
+                    {!profileCompleted && (
+                      <DropdownMenuItem
+                        onClick={() => navigate("/recruiter/complete-profile")}
+                        className="hover:bg-[#f3e8f5] cursor-pointer"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Complete Profile</span>
+                      </DropdownMenuItem>
+                    )}
 
                     <DropdownMenuItem
                       disabled={!profileCompleted}
@@ -179,6 +182,27 @@ const Header = () => {
                       <Briefcase className="mr-2 h-4 w-4" />
                       <span>Create JAF</span>
                     </DropdownMenuItem>
+                    
+                    {/* Show View Profile and Edit Profile options for completed profiles */}
+                    {profileCompleted && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/recruiter/view-profile")}
+                          className="hover:bg-[#f3e8f5] cursor-pointer"
+                        >
+                          <Eye className="mr-2 h-4 w-4 text-blue-600" />
+                          <span>View Profile</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem
+                          onClick={() => navigate("/recruiter/edit-profile")}
+                          className="hover:bg-[#f3e8f5] cursor-pointer"
+                        >
+                          <Edit className="mr-2 h-4 w-4 text-green-600" />
+                          <span>Edit Profile</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </>
                 )}
 

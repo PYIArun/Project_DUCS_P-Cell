@@ -20,11 +20,14 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute.jsx';
 import CoordinatorRoute from './components/ProtectedRoute/CoordinatorRoute.jsx';
 import StudentRoute from './components/ProtectedRoute/StudentRoute.jsx';
 import { CompanyProvider } from './context/CompanyContext.jsx';
-
-
 import RecruiterRoute from './components/ProtectedRoute/RecruiterRoute.jsx';
 import RecruiterHome from './components/Recruiter/RecruiterHome.jsx';
 import CompleteProfile from './components/Recruiter/CompleteProfile.jsx';
+import CreateJAF from './components/Recruiter/CreateJAF.jsx';
+import ViewJAF from './components/Recruiter/ViewJAF.jsx';
+import ViewProfile from './components/Recruiter/ViewProfile.jsx';
+import EditProfileRecruiter from './components/Recruiter/EditProfileRecruiter.jsx';
+
 
 export default function App() {
   return (
@@ -117,7 +120,7 @@ export default function App() {
           }
         />
         
-    {/* Recruiter-only Route */}
+        {/* Recruiter-only Routes */}
         <Route
           path="/recruiter/home"
           element={
@@ -126,16 +129,50 @@ export default function App() {
             </RecruiterRoute>
           }
         />
-      </Routes>
+        <Route
+          path="/recruiter/complete-profile"
+          element={
+            <RecruiterRoute>
+              <CompleteProfile />
+            </RecruiterRoute>
+          }
+        />
 
+        <Route
+          path="/recruiter/create-jaf"
+          element={
+            <RecruiterRoute>
+              <CreateJAF />
+            </RecruiterRoute>
+          }
+        />
+
+        <Route
+          path="/recruiter/jaf/:jafId"
+          element={
+            <RecruiterRoute>
+              <ViewJAF />
+            </RecruiterRoute>
+          }
+        />  
+        <Route
+          path="/recruiter/view-profile"
+          element={
+            <RecruiterRoute>
+              <ViewProfile />
+            </RecruiterRoute>
+          }
+        />
       <Route
-        path = "/recruiter/complete-profile"
+        path="/recruiter/edit-profile"
         element={
           <RecruiterRoute>
-            <CompleteProfile/>
+            <EditProfileRecruiter />
           </RecruiterRoute>
         }
-        />
+      />
+      </Routes>
+
       <Footer />
     </AuthProvider>
   );
