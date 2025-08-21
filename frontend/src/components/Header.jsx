@@ -10,14 +10,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star } from "lucide-react";
+import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star, Building, Briefcase } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from ".././context/AuthContext"; 
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userEmail, userRegistered, isLogin, role, logout } = useAuth();
+  const { 
+    userEmail, 
+    userRegistered, 
+    isLogin, 
+    role, 
+    logout, 
+    profileCompleted,
+    companyName 
+  } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -81,7 +89,12 @@ const Header = () => {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-70 mr-[1rem] top-full left-0 bg-white shadow-lg border rounded-md z-50">
-              <DropdownMenuLabel>{userEmail}</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {userEmail}
+                {role === "Recruiter" && companyName && (
+                  <div className="text-xs text-gray-500">{companyName}</div>
+                )}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 {/* Student Options */}
@@ -135,6 +148,36 @@ const Header = () => {
                     >
                       <MailCheck className="mr-2 h-4 w-4" />
                       <span>Mail to Placement Team</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                {/* Recruiter Options */}
+                {role === "Recruiter" && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/recruiter/home")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <Building className="mr-2 h-4 w-4" />
+                      <span>Recruiter Home</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate("/recruiter/complete-profile")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Complete Profile</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      disabled={!profileCompleted}
+                      onClick={() => navigate("/recruiter/create-jaf")}
+                      className={`cursor-pointer ${!profileCompleted ? 'opacity-50' : 'hover:bg-[#f3e8f5]'}`}
+                    >
+                      <Briefcase className="mr-2 h-4 w-4" />
+                      <span>Create JAF</span>
                     </DropdownMenuItem>
                   </>
                 )}

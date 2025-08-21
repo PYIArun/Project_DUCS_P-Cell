@@ -1,655 +1,686 @@
-import axios from "axios";
-import { useState, useEffect } from "react";
-import { useCompany } from ".././context/CompanyContext";
-import { useAuth } from ".././context/AuthContext";
+import React, { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Pencil, Save, X } from "lucide-react";
+// axios import removed for demo - replace with your actual HTTP client
 
-const ViewCompany = () => {
-  const { company, setCompany } = useCompany();
-  const { userEmail, role } = useAuth();
+const EditProfile = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    name: "",
+    alternateEmail: "",
+    correspondenceAddress: "",
+    permanentAddress: "",
+    phoneNumber: "",
+    alternatePhoneNumber: "",
+    dob: "",
+    gender: "",
+    // PG Details
+    pgCourse: "",
+    pgClassRollNumber: "",
+    pgExamRollNumber: "",
+    pgCgpa: "",
+    pgNumBacklogs: "",
+    pgBacklogDetails: "",
+    // UG Details
+    ugCollegeName: "",
+    ugUniversity: "",
+    ugCourse: "",
+    ugExamRollNumber: "",
+    ugCgpa: "",
+    ugYearOfPassing: "",
+    // 12th Details
+    board12: "",
+    examRollNumber12: "",
+    percentage12: "",
+    yearOfPassing12: "",
+    // 10th Details
+    board10: "",
+    examRollNumber10: "",
+    percentage10: "",
+    yearOfPassing10: "",
+    // Documents
+    resumeLink: "",
+    marksheetDriveLink: "",
+    placementConsent: false,
+  });
 
-  const [activeTab, setActiveTab] = useState("job");
-  const [isApplying, setIsApplying] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isEditable, setIsEditable] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [originalData, setOriginalData] = useState({});
 
-  // Applied students data
-  const [appliedStudents, setAppliedStudents] = useState([]);
-  const [studentsLoading, setStudentsLoading] = useState(false);
-
-  // Popup states
-  const [showPopup, setShowPopup] = useState(false);
-  const [resumeLink, setResumeLink] = useState("");
-  const [isChecked, setIsChecked] = useState(false);
-
-  // Check if current user has already applied
-  const hasApplied = company?.applied_students?.some(
-    student => typeof student === 'object' ? student.email === userEmail : student === userEmail
-  );
-
-  // Fetch company data if not available
   useEffect(() => {
-    const fetchCompany = async () => {
-      if (!company && window.location.pathname.includes('/company/')) {
-        const companyId = window.location.pathname.split('/').pop();
-        if (companyId) {
-          setLoading(true);
-          try {
-            const response = await axios.get(`http://localhost:5000/company/${companyId}`);
-            setCompany(response.data);
-          } catch (err) {
-            setError("Failed to load company details");
-            console.error("Error fetching company:", err);
-          } finally {
-            setLoading(false);
-          }
-        }
-      }
-    };
+    fetchStudentData();
+  }, []);
 
-    fetchCompany();
-  }, [company, setCompany]);
-
-  // Fetch applied students data when Applied Students tab is active
-  const fetchAppliedStudents = async () => {
-    if (!company?._id) return;
-    
-    setStudentsLoading(true);
+  const fetchStudentData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/company/${company._id}/applied-students`);
-      const appliedData = response.data.applied_students;
-      
-      // Fetch detailed student information for each applied student
-      const studentsWithDetails = await Promise.all(
-        appliedData.map(async (application) => {
-          try {
-            const studentResponse = await axios.get(`http://localhost:5000/student/${application.email}`);
-            return {
-              ...application,
-              studentDetails: studentResponse.data
-            };
-          } catch (error) {
-            console.error(`Error fetching details for ${application.email}:`, error);
-            return {
-              ...application,
-              studentDetails: null
-            };
-          }
-        })
-      );
-      
-      setAppliedStudents(studentsWithDetails);
-    } catch (error) {
-      console.error("Error fetching applied students:", error);
-      setError("Failed to load applied students data");
-    } finally {
-      setStudentsLoading(false);
-    }
-  };
-
-  // Fetch applied students when tab becomes active
-  useEffect(() => {
-    if (activeTab === "applied" && company?._id) {
-      fetchAppliedStudents();
-    }
-  }, [activeTab, company?._id]);
-
-  const handleApply = async () => {
-    if (!userEmail || !company) {
-      setError("User email or company information is missing");
-      return;
-    }
-
-    setIsApplying(true);
-    setError("");
-
-    try {
-      // Check if student exists
-      const studentResponse = await axios.get(`http://localhost:5000/student/${userEmail}`);
-      
-      if (!studentResponse.data) {
-        setError("Student profile not found");
+      setLoading(true);
+      // Get email from sessionStorage or your auth system
+      const userEmail = sessionStorage.getItem('userEmail');
+      if (!userEmail) {
+        toast.error("No user session found!");
         return;
       }
 
-      // Apply to company
-      const response = await axios.put(
-        `http://localhost:5000/company/${company._id}`,
-        {
-          email: userEmail,
-          resumeLink: resumeLink,
-        }
-      );
-
-      if (response.status === 200) {
-        // Update local company state with new applied student
-        const newApplication = {
-          email: userEmail,
-          resumeLink: resumeLink,
-          appliedAt: new Date()
-        };
-        
-        setCompany({
-          ...company,
-          applied_students: [...(company.applied_students || []), newApplication]
-        });
-        
-        setShowPopup(false);
-        setResumeLink("");
-        setIsChecked(false);
+      // Fetch student data using the getStudentByEmail endpoint
+      const response = await fetch(`http://localhost:5000/student/${userEmail}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch student data');
       }
+      
+      const studentData = await response.json();
+      
+      // Set form data from API response
+      setFormData({
+        email: studentData.email || "",
+        name: studentData.name || "",
+        alternateEmail: studentData.alternateEmail || "",
+        correspondenceAddress: studentData.correspondenceAddress || "",
+        permanentAddress: studentData.permanentAddress || "",
+        phoneNumber: studentData.phoneNumber || "",
+        alternatePhoneNumber: studentData.alternatePhoneNumber || "",
+        dob: studentData.dob ? new Date(studentData.dob).toISOString().split('T')[0] : "",
+        gender: studentData.gender || "",
+        // PG Details
+        pgCourse: studentData.pgCourse || "",
+        pgClassRollNumber: studentData.pgClassRollNumber || "",
+        pgExamRollNumber: studentData.pgExamRollNumber || "",
+        pgCgpa: studentData.pgCgpa || "",
+        pgNumBacklogs: studentData.pgNumBacklogs || "",
+        pgBacklogDetails: studentData.pgBacklogDetails || "",
+        // UG Details
+        ugCollegeName: studentData.ugCollegeName || "",
+        ugUniversity: studentData.ugUniversity || "",
+        ugCourse: studentData.ugCourse || "",
+        ugExamRollNumber: studentData.ugExamRollNumber || "",
+        ugCgpa: studentData.ugCgpa || "",
+        ugYearOfPassing: studentData.ugYearOfPassing || "",
+        // 12th Details
+        board12: studentData.board12 || "",
+        examRollNumber12: studentData.examRollNumber12 || "",
+        percentage12: studentData.percentage12 || "",
+        yearOfPassing12: studentData.yearOfPassing12 || "",
+        // 10th Details
+        board10: studentData.board10 || "",
+        examRollNumber10: studentData.examRollNumber10 || "",
+        percentage10: studentData.percentage10 || "",
+        yearOfPassing10: studentData.yearOfPassing10 || "",
+        // Documents
+        resumeLink: studentData.resumeLink || "",
+        marksheetDriveLink: studentData.marksheetDriveLink || "",
+        placementConsent: studentData.placementConsent || false,
+      });
+      
+      // Store original data for cancel functionality
+      setOriginalData({
+        email: studentData.email || "",
+        name: studentData.name || "",
+        alternateEmail: studentData.alternateEmail || "",
+        correspondenceAddress: studentData.correspondenceAddress || "",
+        permanentAddress: studentData.permanentAddress || "",
+        phoneNumber: studentData.phoneNumber || "",
+        alternatePhoneNumber: studentData.alternatePhoneNumber || "",
+        dob: studentData.dob ? new Date(studentData.dob).toISOString().split('T')[0] : "",
+        gender: studentData.gender || "",
+        // PG Details
+        pgCourse: studentData.pgCourse || "",
+        pgClassRollNumber: studentData.pgClassRollNumber || "",
+        pgExamRollNumber: studentData.pgExamRollNumber || "",
+        pgCgpa: studentData.pgCgpa || "",
+        pgNumBacklogs: studentData.pgNumBacklogs || "",
+        pgBacklogDetails: studentData.pgBacklogDetails || "",
+        // UG Details
+        ugCollegeName: studentData.ugCollegeName || "",
+        ugUniversity: studentData.ugUniversity || "",
+        ugCourse: studentData.ugCourse || "",
+        ugExamRollNumber: studentData.ugExamRollNumber || "",
+        ugCgpa: studentData.ugCgpa || "",
+        ugYearOfPassing: studentData.ugYearOfPassing || "",
+        // 12th Details
+        board12: studentData.board12 || "",
+        examRollNumber12: studentData.examRollNumber12 || "",
+        percentage12: studentData.percentage12 || "",
+        yearOfPassing12: studentData.yearOfPassing12 || "",
+        // 10th Details
+        board10: studentData.board10 || "",
+        examRollNumber10: studentData.examRollNumber10 || "",
+        percentage10: studentData.percentage10 || "",
+        yearOfPassing10: studentData.yearOfPassing10 || "",
+        // Documents
+        resumeLink: studentData.resumeLink || "",
+        marksheetDriveLink: studentData.marksheetDriveLink || "",
+        placementConsent: studentData.placementConsent || false,
+      });
     } catch (error) {
-      console.error("Error applying to company:", error);
-      if (error.response?.status === 400 && error.response?.data?.message?.includes("already applied")) {
-        setError("You have already applied to this company");
-      } else if (error.response?.status === 404) {
-        setError("Company or student not found");
-      } else {
-        setError("Failed to submit application. Please try again.");
-      }
+      toast.error("Failed to fetch profile data!");
+      console.error("Fetch Error:", error);
     } finally {
-      setIsApplying(false);
+      setLoading(false);
     }
   };
 
-  const closePopup = () => {
-    setShowPopup(false);
-    setResumeLink("");
-    setIsChecked(false);
-    setError("");
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const renderAppliedStudentsTable = () => {
-    if (studentsLoading) {
-      return (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Loading applied students...</span>
-        </div>
-      );
-    }
-
-    if (appliedStudents.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No students have applied yet.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-          <thead className="bg-gray-50">
-            <tr>
-              {role === "Student" ? (
-                // Student view - limited columns
-                <>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Full Name
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    PG Course
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Status
-                  </th>
-                </>
-              ) : (
-                // Placement Coordinator view - all columns
-                <>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Email
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Gender
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Full Name
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    PG Course
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    PG CGPA
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    UG Course
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    UG CGPA
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    12th %
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    10th %
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Resume
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Status
-                  </th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {appliedStudents.map((application, index) => {
-              const student = application.studentDetails;
-              return (
-                <tr key={index} className="hover:bg-gray-50">
-                  {role === "Student" ? (
-                    // Student view
-                    <>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {application.email}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.name || "N/A"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.pgCourse || "N/A"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          application.status 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {application.status || "Applied"}
-                        </span>
-                      </td>
-                    </>
-                  ) : (
-                    // Placement Coordinator view
-                    <>
-                      <td className="px-3 py-4 text-sm text-gray-900">
-                        <div className="break-all">{application.email}</div>
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.gender || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.name || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.pgCourse || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.pgCgpa || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.ugCourse || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.ugCgpa || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.percentage12 || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student?.percentage10 || "N/A"}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm">
-                        {application.resumeLink ? (
-                          <a 
-                            href={application.resumeLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            Link
-                          </a>
-                        ) : (
-                          <span className="text-gray-400">N/A</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          application.status 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {application.status || "Applied"}
-                        </span>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
+  const handleEdit = () => {
+    setIsEditable(true);
+    toast.success("You can now edit your profile!");
   };
+
+  const handleCancel = () => {
+    setFormData(originalData);
+    setIsEditable(false);
+    toast.info("Changes cancelled");
+  };
+
+  const handleSave = async () => {
+    try {
+      const sessionEmail = sessionStorage.getItem('userEmail');
+      if (!sessionEmail) {
+        toast.error("No session email found!");
+        return;
+      }
+
+      const dataToSend = { sessionEmail, ...formData };
+      
+      const response = await fetch("http://localhost:5000/student/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+
+      const result = await response.json();
+      
+      // Update original data to current form data
+      setOriginalData({ ...formData });
+      setIsEditable(false);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update profile!");
+      console.error("Update Error:", error);
+    }
+  };
+
+  const labelClass = "text-sm font-medium text-gray-700";
+  const inputClass = "opacity-90";
+  const sectionHeaderClass = "text-lg font-semibold text-gray-800 border-b-2 border-gray-200 pb-2 mb-4";
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading company details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!company) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-gray-600 text-lg">Company not found</p>
-          <button 
-            onClick={() => window.history.back()} 
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Go Back
-          </button>
-        </div>
+      <div className="w-full min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="text-lg">Loading profile...</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white min-h-screen">
-      {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-start gap-6">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            {company.logo ? (
-              <img
-                src={company.logo}
-                alt={`${company.title || "Company"} logo`}
-                className="w-20 h-20 rounded-lg border border-gray-200 object-contain bg-white p-2"
-                onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/80x80?text=Logo";
-                }}
-              />
-            ) : (
-              <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                <span className="text-gray-400 text-xs">No Logo</span>
-              </div>
-            )}
-          </div>
-
-          {/* Company Info */}
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1 text-left">
-              {company.role || "N/A"}
-            </h1>
-            <h2 className="text-xl text-gray-700 font-medium mb-2 text-left">
-              {company.title || "Unknown Company"}
-            </h2>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
-              <span className="flex items-center">
-                Location: {company.location || "N/A"}
-              </span>
-              <span className="flex items-center">
-                Job-Type: {company.job_type || "N/A"}
-              </span>
-              <span className="flex items-center">
-                CTC: {company.ctc || "N/A"}
-              </span>
-            </div>
-            {company.job_function && (
-              <p className="text-sm text-gray-600">
-                <strong>Function:</strong> {company.job_function}
-              </p>
-            )}
-          </div>
-
-          {/* Apply Button */}
-          <div className="flex-shrink-0">
-            {hasApplied ? (
-              <button
-                disabled
-                className="px-6 py-3 bg-green-50 text-green-700 border border-green-200 rounded-lg font-medium cursor-not-allowed flex items-center gap-2"
+    <div className="w-full min-h-screen flex justify-center items-start bg-gray-50 p-4">
+      <div className="w-full max-w-6xl bg-white shadow-lg rounded-lg p-8 space-y-8 overflow-y-auto max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Edit Profile</h2>
+          <div className="flex gap-2">
+            {!isEditable ? (
+              <Button
+                variant="outline"
+                onClick={handleEdit}
+                className="flex items-center gap-2"
               >
-                <span>✓</span>
-                Applied
-              </button>
+                <Pencil className="h-4 w-4" />
+                Edit Profile
+              </Button>
             ) : (
-              <button
-                onClick={() => setShowPopup(true)}
-                disabled={isApplying || !userEmail}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {isApplying ? "Applying..." : "Apply Now"}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="flex border-b border-gray-200 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab("job")}
-            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
-              activeTab === "job"
-                ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            Job Description
-          </button>
-          <button
-            onClick={() => setActiveTab("workflow")}
-            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
-              activeTab === "workflow"
-                ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            Hiring Process
-          </button>
-          <button
-            onClick={() => setActiveTab("eligibility")}
-            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
-              activeTab === "eligibility"
-                ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            Eligibility
-          </button>
-          <button
-            onClick={() => setActiveTab("applied")}
-            className={`px-6 py-4 font-medium text-sm transition-colors whitespace-nowrap ${
-              activeTab === "applied"
-                ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            Applied Students ({company.applied_students?.length || 0})
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === "job" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Description</h3>
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-700 leading-relaxed">
-                    {company.description || "No job description provided"}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Required Skills</h3>
-                {company.required_skills && company.required_skills.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {company.required_skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">No specific skills mentioned</p>
-                )}
-              </div>
-
-              {company.job_profile && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Profile</h3>
-                  <p className="text-gray-700">{company.job_profile}</p>
-                </div>
-              )}
-
-              {company.additional_info && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Information</h3>
-                  <p className="text-gray-700">{company.additional_info}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "workflow" && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Hiring Process</h3>
-              <div className="prose prose-sm max-w-none">
-                <p className="text-gray-700 leading-relaxed">
-                  {company.hiring_workflow || "Hiring process details not specified"}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "eligibility" && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Eligibility Criteria</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {company.eligibility || "No specific eligibility criteria mentioned"}
-                </p>
-              </div>
-
-              {company.applicable_courses && company.applicable_courses.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Applicable Courses</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {company.applicable_courses.map((course, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-200"
-                      >
-                        {course}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "applied" && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Applied Students ({appliedStudents.length})
-                </h3>
-                <button
-                  onClick={fetchAppliedStudents}
-                  className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                  disabled={studentsLoading}
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="flex items-center gap-2 text-gray-600"
                 >
-                  {studentsLoading ? "Refreshing..." : "Refresh"}
-                </button>
-              </div>
-              
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm">{error}</p>
-                </div>
-              )}
-
-              {renderAppliedStudentsTable()}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Application Modal */}
-      {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full shadow-2xl">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Submit Application</h2>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm">{error}</p>
-                </div>
-              )}
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Resume Link *
-                </label>
-                <input
-                  type="url"
-                  value={resumeLink}
-                  onChange={(e) => setResumeLink(e.target.value)}
-                  placeholder="https://drive.google.com/file/d/..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={(e) => setIsChecked(e.target.checked)}
-                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="text-sm text-gray-700 leading-relaxed">
-                    I hereby declare that I will make myself available for all mandatory events 
-                    related to the Placement Drive, including Pre-Placement Talk, Online Assessment, 
-                    and Interview Rounds. In case of emergency, I will inform the Placement Team 
-                    at <strong>placements@cs.du.ac.in</strong>.
-                  </span>
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={closePopup}
-                  disabled={isApplying}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                >
+                  <X className="h-4 w-4" />
                   Cancel
-                </button>
-                <button
-                  onClick={handleApply}
-                  disabled={!isChecked || !resumeLink.trim() || isApplying}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="flex items-center gap-2 bg-[#72265F] hover:bg-[#602050] text-white"
                 >
-                  {isApplying ? "Submitting..." : "Submit Application"}
-                </button>
-              </div>
+                  <Save className="h-4 w-4" />
+                  Save Changes
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Personal Information Section */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>Personal Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className={labelClass}>Email Address</Label>
+              <Input
+                name="email"
+                value={formData.email}
+                readOnly
+                className={`${inputClass} bg-gray-100`}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Full Name *</Label>
+              <Input 
+                name="name" 
+                value={formData.name}
+                placeholder="Enter your full name" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Alternate Email</Label>
+              <Input 
+                name="alternateEmail" 
+                value={formData.alternateEmail}
+                placeholder="alternate@email.com" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Phone Number *</Label>
+              <Input 
+                name="phoneNumber" 
+                value={formData.phoneNumber}
+                placeholder="10-digit mobile number" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Alternative Phone Number</Label>
+              <Input 
+                name="alternatePhoneNumber" 
+                value={formData.alternatePhoneNumber}
+                placeholder="Optional mobile number" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Date of Birth *</Label>
+              <Input 
+                type="date" 
+                name="dob" 
+                value={formData.dob}
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Gender *</Label>
+              <select 
+                name="gender" 
+                value={formData.gender}
+                className={`${inputClass} w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                onChange={handleChange}
+                disabled={!isEditable}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Label className={labelClass}>Correspondence Address *</Label>
+              <Input 
+                name="correspondenceAddress" 
+                value={formData.correspondenceAddress}
+                placeholder="Current address for correspondence" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Permanent Address *</Label>
+              <Input 
+                name="permanentAddress" 
+                value={formData.permanentAddress}
+                placeholder="Permanent home address" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
             </div>
           </div>
         </div>
-      )}
+
+        {/* PG Details Section */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>Post Graduate (PG) Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className={labelClass}>PG Course *</Label>
+              <select 
+                name="pgCourse" 
+                value={formData.pgCourse}
+                className={`${inputClass} w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                onChange={handleChange}
+                disabled={!isEditable}
+              >
+                <option value="">Select PG Course</option>
+                <option value="MCA">MCA</option>
+                <option value="MSc">MSc</option>
+              </select>
+            </div>
+            <div>
+              <Label className={labelClass}>PG Class Roll Number *</Label>
+              <Input 
+                name="pgClassRollNumber" 
+                value={formData.pgClassRollNumber}
+                placeholder="e.g., 24MCA001" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>PG Examination Roll Number *</Label>
+              <Input 
+                name="pgExamRollNumber" 
+                value={formData.pgExamRollNumber}
+                placeholder="University examination roll number" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>PG CGPA *</Label>
+              <Input 
+                name="pgCgpa" 
+                value={formData.pgCgpa}
+                placeholder="Current overall CGPA" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Number of Backlogs (in PG) *</Label>
+              <Input 
+                name="pgNumBacklogs" 
+                value={formData.pgNumBacklogs}
+                placeholder="e.g., 0, 1, 2" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Details of Backlogs</Label>
+              <Input 
+                name="pgBacklogDetails" 
+                value={formData.pgBacklogDetails}
+                placeholder="Mention subjects if any, otherwise write 'None'" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* UG Details Section */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>Under Graduate (UG) Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className={labelClass}>UG College Name *</Label>
+              <Input 
+                name="ugCollegeName" 
+                value={formData.ugCollegeName}
+                placeholder="Name of your undergraduate college" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>UG University Name *</Label>
+              <Input 
+                name="ugUniversity" 
+                value={formData.ugUniversity}
+                placeholder="Name of your undergraduate university" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>UG Course Name *</Label>
+              <Input 
+                name="ugCourse" 
+                value={formData.ugCourse}
+                placeholder="e.g., B.Tech CSE, B.Sc Computer Science" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>UG Examination Roll Number *</Label>
+              <Input 
+                name="ugExamRollNumber" 
+                value={formData.ugExamRollNumber}
+                placeholder="University examination roll number" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>UG CGPA *</Label>
+              <Input 
+                name="ugCgpa" 
+                value={formData.ugCgpa}
+                placeholder="Overall CGPA" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>UG Year of Passing *</Label>
+              <Input 
+                name="ugYearOfPassing" 
+                value={formData.ugYearOfPassing}
+                placeholder="YYYY" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 12th Details Section */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>12th Standard Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className={labelClass}>Board Name *</Label>
+              <Input 
+                name="board12" 
+                value={formData.board12}
+                placeholder="e.g., CBSE, ICSE, State Board" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Examination Roll Number *</Label>
+              <Input 
+                name="examRollNumber12" 
+                value={formData.examRollNumber12}
+                placeholder="12th exam roll number" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Percentage or CGPA *</Label>
+              <Input 
+                name="percentage12" 
+                value={formData.percentage12}
+                placeholder="e.g., 85% or 8.5 CGPA" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Year of Passing *</Label>
+              <Input 
+                name="yearOfPassing12" 
+                value={formData.yearOfPassing12}
+                placeholder="YYYY" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 10th Details Section */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>10th Standard Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className={labelClass}>Board Name *</Label>
+              <Input 
+                name="board10" 
+                value={formData.board10}
+                placeholder="e.g., CBSE, ICSE, State Board" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Examination Roll Number *</Label>
+              <Input 
+                name="examRollNumber10" 
+                value={formData.examRollNumber10}
+                placeholder="10th exam roll number" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Percentage or CGPA *</Label>
+              <Input 
+                name="percentage10" 
+                value={formData.percentage10}
+                placeholder="e.g., 90% or 9.0 CGPA" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Year of Passing *</Label>
+              <Input 
+                name="yearOfPassing10" 
+                value={formData.yearOfPassing10}
+                placeholder="YYYY" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Documents Section */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>Documents</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Label className={labelClass}>Resume Link *</Label>
+              <Input 
+                name="resumeLink" 
+                value={formData.resumeLink}
+                placeholder="https://drive.google.com/... (Google Drive link)" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+            </div>
+            <div>
+              <Label className={labelClass}>Upload Marksheets (PG, UG, 12th, 10th) *</Label>
+              <Input 
+                name="marksheetDriveLink" 
+                value={formData.marksheetDriveLink}
+                placeholder="https://drive.google.com/... (Google Drive folder link)" 
+                className={inputClass} 
+                onChange={handleChange}
+                disabled={!isEditable}
+              />
+              <p className="text-xs text-gray-500 mt-1">Please upload all marksheets (PG, UG, 12th, 10th) in a single drive folder and share the link</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Placement Consent */}
+        <div className="space-y-4">
+          <h3 className={sectionHeaderClass}>Placement Policy</h3>
+          <div className="bg-blue-50 p-6 rounded-lg space-y-4">
+            <div className="flex items-center p-4 bg-white rounded border">
+              <input
+                type="checkbox"
+                name="placementConsent"
+                checked={formData.placementConsent}
+                onChange={handleChange}
+                disabled={!isEditable}
+                className="mr-3 w-4 h-4"
+              />
+              <label htmlFor="placementConsent" className="text-sm font-medium text-gray-800">
+                I agree to the Placement Policy 2025–26 *
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ViewCompany;
+export default EditProfile;

@@ -2,8 +2,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import cookieParser from "cookie-parser";
-
 import highlightRoutes from './Routes/highlightRoutes.js';
 import studentRoutes from './Routes/studentRoutes.js';
 import coordinatorRoutes from './Routes/coordinatorRoutes.js';
@@ -16,7 +14,6 @@ const app = express();
 
 
 app.use(express.json());
-app.use(cookieParser());
 app.use(cors());
 
 mongoose.connect(process.env.MONGO_URI)

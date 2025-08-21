@@ -24,6 +24,7 @@ import { CompanyProvider } from './context/CompanyContext.jsx';
 
 import RecruiterRoute from './components/ProtectedRoute/RecruiterRoute.jsx';
 import RecruiterHome from './components/Recruiter/RecruiterHome.jsx';
+import CompleteProfile from './components/Recruiter/CompleteProfile.jsx';
 
 export default function App() {
   return (
@@ -126,6 +127,15 @@ export default function App() {
           }
         />
       </Routes>
+
+      <Route
+        path = "/recruiter/complete-profile"
+        element={
+          <RecruiterRoute>
+            <CompleteProfile/>
+          </RecruiterRoute>
+        }
+        />
       <Footer />
     </AuthProvider>
   );

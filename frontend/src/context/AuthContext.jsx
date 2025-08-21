@@ -18,6 +18,11 @@ export const AuthProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Recruiter specific states
+  const [recruiterId, setRecruiterId] = useState(null);
+  const [profileCompleted, setProfileCompleted] = useState(false);
+  const [companyName, setCompanyName] = useState(null);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -29,20 +34,52 @@ export const AuthProvider = ({ children }) => {
       const storedEmail = sessionStorage.getItem("userEmail");
       const storedLoginStatus = sessionStorage.getItem("loginStatus");
       const storedRole = sessionStorage.getItem("role");
+      const recruiterToken = sessionStorage.getItem("recruiterToken");
       
       if (storedEmail && storedLoginStatus === "true") {
         setUserEmail(storedEmail);
         setIsLogin(true);
         setRole(storedRole);
         
-        // Only fetch student data if user is a student
+        // Handle different user types
         if (storedRole === "Student") {
           const response = await axios.get(`http://localhost:5000/student/${storedEmail}`);
           const student = response.data;
           setUserRegistered(student.registered === "yes");
+        } else if (storedRole === "Recruiter") {
+          // Fetch recruiter data
+          const response = await axios.get(`http://localhost:5000/recruiter/${storedEmail}`);
+          const recruiter = response.data;
+          setUserRegistered(recruiter.registered === "yes");
+          setRecruiterId(recruiter.id);
+          setProfileCompleted(recruiter.profileCompleted);
+          setCompanyName(recruiter.companyName);
         } else {
           // For coordinators, assume they're always "registered"
           setUserRegistered(true);
+        }
+      } else if (recruiterToken) {
+        // Handle recruiter token authentication
+        try {
+          // Decode token or validate with backend
+          // For now, just check if token exists and validate with backend
+          const response = await axios.get("http://localhost:5000/recruiter/validate", {
+            headers: { Authorization: `Bearer ${recruiterToken}` }
+          });
+          
+          if (response.data.valid) {
+            const recruiter = response.data.recruiter;
+            setUserEmail(recruiter.email);
+            setIsLogin(true);
+            setRole("Recruiter");
+            setUserRegistered(true);
+            setRecruiterId(recruiter.id);
+            setProfileCompleted(recruiter.profileCompleted);
+            setCompanyName(recruiter.companyName);
+          }
+        } catch (error) {
+          console.error("Token validation error:", error);
+          sessionStorage.removeItem("recruiterToken");
         }
       }
     } catch (error) {
@@ -64,20 +101,43 @@ export const AuthProvider = ({ children }) => {
       setIsLogin(true);
       setRole(userRole);
       
-      // Only fetch student data if user is a student
+      // Handle different user types
       if (userRole === "Student") {
         const response = await axios.get(`http://localhost:5000/student/${email}`);
         const student = response.data;
         setUserRegistered(student.registered === "yes");
-        return student; // Return student data for further processing
+        return student;
+      } else if (userRole === "Recruiter") {
+        const response = await axios.get(`http://localhost:5000/recruiter/${email}`);
+        const recruiter = response.data;
+        setUserRegistered(recruiter.registered === "yes");
+        setRecruiterId(recruiter.id);
+        setProfileCompleted(recruiter.profileCompleted);
+        setCompanyName(recruiter.companyName);
+        return recruiter;
       } else {
         setUserRegistered(true);
         return { registered: "yes" };
       }
     } catch (error) {
       console.error("Error during login:", error);
-      throw error; // Re-throw to handle in login component
+      throw error;
     }
+  };
+
+  const loginRecruiter = async (token, recruiterData) => {
+    sessionStorage.setItem("recruiterToken", token);
+    sessionStorage.setItem("userEmail", recruiterData.email);
+    sessionStorage.setItem("loginStatus", "true");
+    sessionStorage.setItem("role", "Recruiter");
+    
+    setUserEmail(recruiterData.email);
+    setIsLogin(true);
+    setRole("Recruiter");
+    setUserRegistered(true);
+    setRecruiterId(recruiterData.id);
+    setProfileCompleted(recruiterData.profileCompleted);
+    setCompanyName(recruiterData.companyName);
   };
 
   const logout = () => {
@@ -86,10 +146,17 @@ export const AuthProvider = ({ children }) => {
     setUserRegistered(false);
     setIsLogin(false);
     setRole(null);
+    setRecruiterId(null);
+    setProfileCompleted(false);
+    setCompanyName(null);
   };
 
   const updateRegistrationStatus = (registered) => {
     setUserRegistered(registered);
+  };
+
+  const updateProfileStatus = (completed) => {
+    setProfileCompleted(completed);
   };
 
   const value = {
@@ -98,9 +165,14 @@ export const AuthProvider = ({ children }) => {
     isLogin,
     role,
     loading,
+    recruiterId,
+    profileCompleted,
+    companyName,
     login,
+    loginRecruiter,
     logout,
     updateRegistrationStatus,
+    updateProfileStatus,
     checkAuthStatus
   };
 

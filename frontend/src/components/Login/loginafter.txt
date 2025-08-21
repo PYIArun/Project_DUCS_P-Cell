@@ -1,10 +1,8 @@
-// Login.js - Fixed version with all login types working
-import React, { useState } from 'react';
+// Login.js - Updated to use Auth Context
+import { useState } from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import app from './Firebase'; // Make sure this import is present
 import { toast, Bounce } from 'react-toastify';
 import axios from 'axios';
-import moment from 'moment'; // Keep this if used elsewhere
 import 'react-toastify/dist/ReactToastify.css';
 import { FcGoogle } from "react-icons/fc";
 
@@ -32,21 +30,87 @@ const Login = () => {
     const navigate = useNavigate();
     const { login, loginRecruiter } = useAuth();
 
-    // States for Recruiter Login
     const [loginEmail, setLoginEmail] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
 
-    // States for Recruiter Register
+    // States for Register
     const [regEmail, setRegEmail] = useState("");
     const [regCompanyName, setRegCompanyName] = useState("");
     const [regPassword, setRegPassword] = useState("");
     const [regConfirmPassword, setRegConfirmPassword] = useState("");
 
-    // Student Google Login
+   // Login handler for recruiters
+    const handleLogin = async () => {
+        try {
+            const res = await axios.post("http://localhost:5000/recruiter/login", {
+                email: loginEmail,
+                password: loginPassword,
+            });
+
+            // Use the context login method for recruiters
+            await loginRecruiter(res.data.token, res.data.recruiter);
+
+            toast.success(res.data.message || "Login successful", {
+                position: "bottom-center",
+                autoClose: 3000,
+                theme: "light",
+                transition: Bounce,
+            });
+
+            navigate("/recruiter/home");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Login failed", {
+                position: "bottom-center",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+            });
+        }
+    };
+
+    // Register handler for recruiters
+    const handleRegister = async () => {
+        if (regPassword !== regConfirmPassword) {
+            toast.error("Passwords do not match!", {
+                position: "bottom-center",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+            });
+            return;
+        }
+        try {
+            const res = await axios.post("http://localhost:5000/recruiter/register", {
+                email: regEmail,
+                companyName: regCompanyName,
+                password: regPassword,
+            });
+
+            // Use the context login method for recruiters
+            await loginRecruiter(res.data.token, res.data.recruiter);
+
+            toast.success(res.data.message || "Registration successful", {
+                position: "bottom-center",
+                autoClose: 3000,
+                theme: "light",
+                transition: Bounce,
+            });
+
+            navigate("/recruiter/home");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Registration failed", {
+                position: "bottom-center",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+            });
+        }
+    };
+
     const googleLogin = async () => {
         try {
             const provider = new GoogleAuthProvider();
-            const auth = getAuth(app); // Make sure to pass the app instance
+            const auth = getAuth();
 
             // Sign in with Google
             const result = await signInWithPopup(auth, provider);
@@ -70,7 +134,7 @@ const Login = () => {
             }
 
         } catch (error) {
-            console.error("Student login error:", error);
+            console.error(error);
 
             // Handle backend validation errors
             if (error.response) {
@@ -109,7 +173,6 @@ const Login = () => {
         }
     };
 
-    // Coordinator Google Login
     const googleLoginCoordinator = async () => {
         try {
             // Fetch all coordinators from the backend
@@ -122,7 +185,7 @@ const Login = () => {
 
             // Google Authentication
             const provider = new GoogleAuthProvider();
-            const auth = getAuth(app); // Make sure to pass the app instance
+            const auth = getAuth();
             const result = await signInWithPopup(auth, provider);
             const userEmail = result.user.email;
 
@@ -157,7 +220,7 @@ const Login = () => {
             navigate("/studentHome");
 
         } catch (error) {
-            console.error("Coordinator login error:", error);
+            console.error("Login Error:", error);
 
             // Handle backend validation errors
             if (error.response) {
@@ -196,97 +259,6 @@ const Login = () => {
         }
     };
 
-    // Recruiter Login handler
-    const handleLogin = async () => {
-        if (!loginEmail || !loginPassword) {
-            toast.error("Please fill in all fields", {
-                position: "bottom-center",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-            });
-            return;
-        }
-
-        try {
-            const res = await axios.post("http://localhost:5000/recruiter/login", {
-                email: loginEmail,
-                password: loginPassword,
-            });
-
-            // Use the context login method for recruiters
-            await loginRecruiter(res.data.token, res.data.recruiter);
-
-            toast.success(res.data.message || "Login successful", {
-                position: "bottom-center",
-                autoClose: 3000,
-                theme: "light",
-                transition: Bounce,
-            });
-
-            navigate("/recruiter/home");
-        } catch (err) {
-            console.error("Recruiter login error:", err);
-            toast.error(err.response?.data?.message || "Login failed", {
-                position: "bottom-center",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-            });
-        }
-    };
-
-    // Recruiter Register handler
-    const handleRegister = async () => {
-        if (!regEmail || !regCompanyName || !regPassword || !regConfirmPassword) {
-            toast.error("Please fill in all fields", {
-                position: "bottom-center",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-            });
-            return;
-        }
-
-        if (regPassword !== regConfirmPassword) {
-            toast.error("Passwords do not match!", {
-                position: "bottom-center",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-            });
-            return;
-        }
-
-        try {
-            const res = await axios.post("http://localhost:5000/recruiter/register", {
-                email: regEmail,
-                companyName: regCompanyName,
-                password: regPassword,
-            });
-
-            // Use the context login method for recruiters
-            await loginRecruiter(res.data.token, res.data.recruiter);
-
-            toast.success(res.data.message || "Registration successful", {
-                position: "bottom-center",
-                autoClose: 3000,
-                theme: "light",
-                transition: Bounce,
-            });
-
-            navigate("/recruiter/home");
-        } catch (err) {
-            console.error("Recruiter registration error:", err);
-            toast.error(err.response?.data?.message || "Registration failed", {
-                position: "bottom-center",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-            });
-        }
-    };
-
     return (
         <div className="flex justify-center min-h-[46.9rem] bg-[#fafafa] ">
             <div className="my-[5rem]">
@@ -296,8 +268,6 @@ const Login = () => {
                         <TabsTrigger value="recruiter">Recruiter</TabsTrigger>
                         <TabsTrigger value="coordinator">Coordinator</TabsTrigger>
                     </TabsList>
-                    
-                    {/* STUDENT TAB */}
                     <TabsContent value="student" >
                         <Card className='rounded-[0.5rem]' >
                             <CardHeader>
@@ -320,8 +290,6 @@ const Login = () => {
                             </CardFooter>
                         </Card>
                     </TabsContent>
-                    
-                    {/* RECRUITER TAB */}
                     <TabsContent value="recruiter">
                         <Tabs defaultValue="recruiter_login" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 border bg-card text-card-foreground shadow-sm">
@@ -329,7 +297,7 @@ const Login = () => {
                                 <TabsTrigger value="recruiter_register">Register</TabsTrigger>
                             </TabsList>
 
-                            {/* RECRUITER LOGIN */}
+                            {/* LOGIN */}
                             <TabsContent value="recruiter_login">
                                 <Card className="rounded-[0.5rem]">
                                     <CardHeader>
@@ -344,7 +312,6 @@ const Login = () => {
                                                 type="email"
                                                 value={loginEmail}
                                                 onChange={(e) => setLoginEmail(e.target.value)}
-                                                placeholder="Enter your email"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -354,22 +321,18 @@ const Login = () => {
                                                 type="password"
                                                 value={loginPassword}
                                                 onChange={(e) => setLoginPassword(e.target.value)}
-                                                placeholder="Enter your password"
                                             />
                                         </div>
                                     </CardContent>
                                     <CardFooter>
-                                        <Button 
-                                            onClick={handleLogin} 
-                                            className="select-none font-instrument px-[1.25rem] py-[0.5rem] bg-[#72265F] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold text-white rounded-[0.5rem]"
-                                        >
+                                        <Button onClick={handleLogin} className="px-[1.25rem] py-[0.5rem] bg-[#72265F] text-white rounded-[0.5rem] hover:bg-[#602050] active:scale-95 transition">
                                             Login
                                         </Button>
                                     </CardFooter>
                                 </Card>
                             </TabsContent>
 
-                            {/* RECRUITER REGISTER */}
+                            {/* REGISTER */}
                             <TabsContent value="recruiter_register">
                                 <Card className="rounded-[0.5rem]">
                                     <CardHeader>
@@ -384,7 +347,6 @@ const Login = () => {
                                                 type="email"
                                                 value={regEmail}
                                                 onChange={(e) => setRegEmail(e.target.value)}
-                                                placeholder="Enter your email"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -393,7 +355,6 @@ const Login = () => {
                                                 id="reg_company"
                                                 value={regCompanyName}
                                                 onChange={(e) => setRegCompanyName(e.target.value)}
-                                                placeholder="Enter company name"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -403,7 +364,6 @@ const Login = () => {
                                                 type="password"
                                                 value={regPassword}
                                                 onChange={(e) => setRegPassword(e.target.value)}
-                                                placeholder="Create password"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -413,15 +373,11 @@ const Login = () => {
                                                 type="password"
                                                 value={regConfirmPassword}
                                                 onChange={(e) => setRegConfirmPassword(e.target.value)}
-                                                placeholder="Confirm password"
                                             />
                                         </div>
                                     </CardContent>
                                     <CardFooter>
-                                        <Button 
-                                            onClick={handleRegister} 
-                                            className="select-none font-instrument px-[1.25rem] py-[0.5rem] bg-[#72265F] hover:text-[#72265F] hover:border-[1px] hover:border-[#72265F] active:scale-95 transition-all ease-in hover:ease-in hover:transition-all active:ease-in active:transition-all font-semibold text-white rounded-[0.5rem]"
-                                        >
+                                        <Button onClick={handleRegister} className="px-[1.25rem] py-[0.5rem] bg-[#72265F] text-white rounded-[0.5rem] hover:bg-[#602050] active:scale-95 transition">
                                             Register
                                         </Button>
                                     </CardFooter>
@@ -429,8 +385,6 @@ const Login = () => {
                             </TabsContent>
                         </Tabs>
                     </TabsContent>
-                    
-                    {/* COORDINATOR TAB */}
                     <TabsContent value="coordinator">
                         <Card className='rounded-[0.5rem]'>
                             <CardHeader>
