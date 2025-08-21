@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { Recruiter, JAF } from "../Models/Recruiters.js";
+import { Recruiter } from "../Models/Recruiters.js";
+import { JAF } from "../Models/JAF.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -167,9 +168,10 @@ export const completeProfile = async (req, res) => {
 // ===============================
 export const createJAF = async (req, res) => {
   try {
-    const { recruiterId } = req.params;
+    const { recruiterId } = req.body;   // 👈 now from body
     const jafData = req.body;
 
+    console.log("JAF Data from frontend:", jafData);
     const recruiter = await Recruiter.findById(recruiterId);
     if (!recruiter) {
       return res.status(404).json({ message: "Recruiter not found." });
@@ -179,7 +181,8 @@ export const createJAF = async (req, res) => {
       return res.status(400).json({ message: "Please complete your profile first." });
     }
 
-    // Create new JAF
+
+
     const newJAF = new JAF({
       ...jafData,
       recruiterId,
@@ -188,7 +191,6 @@ export const createJAF = async (req, res) => {
 
     await newJAF.save();
 
-    // Add JAF reference to recruiter
     recruiter.jafs.push(newJAF._id);
     await recruiter.save();
 
@@ -201,6 +203,7 @@ export const createJAF = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 // ===============================
 // GET JAFs BY RECRUITER

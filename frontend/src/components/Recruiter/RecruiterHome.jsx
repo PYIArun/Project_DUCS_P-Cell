@@ -5,20 +5,17 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Edit, Trash2, Briefcase, Calendar, MapPin, DollarSign } from "lucide-react";
+import { Plus, Eye, Trash2, Briefcase, Calendar, MapPin, DollarSign } from "lucide-react";
 import { toast, Bounce } from 'react-toastify';
 
 const RecruiterHome = () => {
   const [jafs, setJafs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { recruiterId, userEmail, profileCompleted } = useAuth();
+  const { recruiterId, profileCompleted } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!recruiterId) {
-      // navigate('/login');
-      return;
-    }
+    if (!recruiterId) return;
     fetchJAFs();
   }, [recruiterId]);
 
@@ -44,10 +41,6 @@ const RecruiterHome = () => {
     navigate(`/recruiter/jaf/${jafId}`);
   };
 
-  const handleEditJAF = (jafId) => {
-    navigate(`/recruiter/edit-jaf/${jafId}`);
-  };
-
   const handleDeleteJAF = async (jafId) => {
     if (window.confirm('Are you sure you want to delete this JAF?')) {
       try {
@@ -58,7 +51,7 @@ const RecruiterHome = () => {
           theme: "light",
           transition: Bounce,
         });
-        fetchJAFs(); // Refresh the list
+        fetchJAFs();
       } catch (error) {
         console.error('Error deleting JAF:', error);
         toast.error('Error deleting JAF', {
@@ -86,6 +79,15 @@ const RecruiterHome = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return isNaN(date) ? dateString : date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   return (
     <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[75rem] mx-auto">
       {/* Header */}
@@ -109,7 +111,7 @@ const RecruiterHome = () => {
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-800">
               <strong>Complete your profile first</strong> to create Job Application Forms.{' '}
-              <span 
+              <span
                 className="underline cursor-pointer font-semibold"
                 onClick={() => navigate('/recruiter/complete-profile')}
               >
@@ -122,12 +124,10 @@ const RecruiterHome = () => {
 
       {/* JAFs Section */}
       <div className="bg-white rounded-2xl border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[#72265F]">Recent JAFs</h2>
-            <div className="text-sm text-gray-500">
-              {jafs.length} application{jafs.length !== 1 ? 's' : ''}
-            </div>
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-[#72265F]">Recent JAFs</h2>
+          <div className="text-sm text-gray-500">
+            {jafs.length} application{jafs.length !== 1 ? 's' : ''}
           </div>
         </div>
 
@@ -162,149 +162,68 @@ const RecruiterHome = () => {
             <div className="grid gap-6">
               {jafs.map((jaf) => (
                 <Card key={jaf._id} className="hover:shadow-lg transition-shadow duration-300 border border-gray-200">
-                  <CardHeader className="pb-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl text-[#72265F] mb-2">
-                          {jaf.companyName}
-                        </CardTitle>
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          <Badge className={getStatusColor(jaf.status)}>
-                            {jaf.status.charAt(0).toUpperCase() + jaf.status.slice(1)}
-                          </Badge>
-                          {jaf.jobProfiles && jaf.jobProfiles.length > 0 && (
-                            <Badge variant="outline" className="text-gray-600 border-gray-300">
-                              {jaf.jobProfiles.length} Profile{jaf.jobProfiles.length !== 1 ? 's' : ''}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleViewJAF(jaf._id)}
-                          className="text-[#72265F] border-[#72265F] hover:bg-[#72265F] hover:text-white"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteJAF(jaf._id)}
-                          className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                  <CardHeader className="pb-4 flex justify-between items-start">
+                    <CardTitle className="text-xl text-[#72265F]">
+                      {jaf.jobProfile?.jobProfile}
+                    </CardTitle>
+                    <Badge className={getStatusColor(jaf.status)}>
+                      {jaf.status.charAt(0).toUpperCase() + jaf.status.slice(1)}
+                    </Badge>
+                  </CardHeader>
+
+                  <CardContent className="pt-0 space-y-4">
+                    {/* Job Profile */}
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
+                        <Briefcase className="w-4 h-4 mr-1" />
+                        Job Profile
+                      </h4>
+                      <div className="bg-gray-50 p-3 rounded-lg space-y-2">
+                        <p><strong>Designation:</strong> {jaf.jobProfile?.jobDesignation}</p>
+                        <p className="flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" /> {jaf.jobProfile?.placeOfPosting}
+                        </p>
+                        <p>{jaf.jobProfile?.jobDescription}</p>
+                        <p className="flex items-center">
+                          Salary : {jaf.jobProfile?.annualPackage}
+                        </p>
+
                       </div>
                     </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {/* Job Profiles Preview */}
-                      <div>
-                        <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
-                          <Briefcase className="w-4 h-4 mr-1" />
-                          Job Profiles
-                        </h4>
-                        {jaf.jobProfiles && jaf.jobProfiles.length > 0 ? (
-                          <div className="space-y-2">
-                            {jaf.jobProfiles.slice(0, 2).map((profile, index) => (
-                              <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                                <div className="font-medium text-sm text-gray-900">
-                                  {profile.jobDesignation}
-                                </div>
-                                <div className="text-xs text-gray-600 flex items-center mt-1">
-                                  <MapPin className="w-3 h-3 mr-1" />
-                                  {profile.placeOfPosting}
-                                </div>
-                                <div className="text-xs text-gray-600 flex items-center mt-1">
-                                  <DollarSign className="w-3 h-3 mr-1" />
-                                  {profile.annualPackage}
-                                </div>
-                              </div>
-                            ))}
-                            {jaf.jobProfiles.length > 2 && (
-                              <div className="text-xs text-gray-500 text-center py-2">
-                                +{jaf.jobProfiles.length - 2} more profile{jaf.jobProfiles.length - 2 !== 1 ? 's' : ''}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-500">No job profiles added</p>
-                        )}
-                      </div>
 
-                      {/* Company Details */}
-                      <div>
-                        <h4 className="font-semibold text-gray-700 mb-2">Company Details</h4>
-                        <div className="space-y-2 text-sm">
-                          <div>
-                            <span className="text-gray-500">Website:</span>
-                            <span className="ml-2 text-blue-600 hover:underline">
-                              <a href={jaf.website} target="_blank" rel="noopener noreferrer">
-                                {jaf.website}
-                              </a>
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Email:</span>
-                            <span className="ml-2">{jaf.emailAddress}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Phone:</span>
-                            <span className="ml-2">{jaf.telephoneNo}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Courses:</span>
-                            <span className="ml-2">
-                              {jaf.coursesAllowed?.msc === 'Yes' && 'M.Sc '}
-                              {jaf.coursesAllowed?.mca === 'Yes' && 'MCA'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                    {/* Selection Process */}
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Selection Process</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li>Pre-Placement Talk: {jaf.selectionProcess?.prePlacementTalk}</li>
+                        <li>Online Assessment: {jaf.selectionProcess?.onlineAssessment}</li>
+                        <li>Technical Interview: {jaf.selectionProcess?.personalTechnicalInterview}</li>
+                        <li>HR Round: {jaf.selectionProcess?.hrRound}</li>
+                        {jaf.selectionProcess?.anyOtherRounds && (
+                          <li>Other Rounds: {jaf.selectionProcess?.anyOtherRounds}</li>
+                        )}
+                      </ul>
                     </div>
 
                     {/* Timeline */}
                     {(jaf.timeline?.onlineCodingTestDate || jaf.timeline?.interviewDate) && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div>
                         <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          Timeline
+                          <Calendar className="w-4 h-4 mr-1" /> Timeline
                         </h4>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          {jaf.timeline.onlineCodingTestDate && (
-                            <div>
-                              <span className="text-gray-500">Coding Test:</span>
-                              <span className="ml-2">
-                                {new Date(jaf.timeline.onlineCodingTestDate).toLocaleDateString()}
-                              </span>
-                            </div>
+                        <div className="text-sm space-y-1">
+                          {jaf.timeline?.onlineCodingTestDate && (
+                            <p>Coding Test: {formatDate(jaf.timeline.onlineCodingTestDate)}</p>
                           )}
-                          {jaf.timeline.interviewDate && (
-                            <div>
-                              <span className="text-gray-500">Interview:</span>
-                              <span className="ml-2">
-                                {new Date(jaf.timeline.interviewDate).toLocaleDateString()}
-                              </span>
-                            </div>
+                          {jaf.timeline?.interviewDate && (
+                            <p>Interview: {formatDate(jaf.timeline.interviewDate)}</p>
                           )}
                         </div>
                       </div>
                     )}
 
                     {/* Created Date */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500">
-                      Created on {new Date(jaf.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </div>
+                   <p>Created on {new Date(jaf.createdAt).toLocaleDateString("en-IN")}</p>
                   </CardContent>
                 </Card>
               ))}

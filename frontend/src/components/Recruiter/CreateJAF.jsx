@@ -7,32 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast, Bounce } from 'react-toastify';
 import axios from 'axios';
-import { Plus, Trash2, Save, Calendar, Users, Briefcase, FileText } from 'lucide-react';
+import { Plus, Trash2, Save } from 'lucide-react';
 
 const CreateJAF = () => {
-  const { recruiterId, userEmail, profileCompleted } = useAuth();
+  const { recruiterId, profileCompleted } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [recruiterData, setRecruiterData] = useState(null);
 
   const [formData, setFormData] = useState({
-    companyName: '',
-    telephoneNo: '',
-    emailAddress: '',
-    website: '',
-    headHR: {
-      name: '',
-      email: '',
-      mobileNumber: ''
-    },
-    secondContactPerson: {
-      name: '',
-      email: '',
-      mobileNumber: ''
-    },
+    recruiterId: recruiterId,
     coursesAllowed: {
       msc: 'No',
       mca: 'No'
@@ -42,14 +27,14 @@ const CreateJAF = () => {
       fullTime: 'NO',
       internshipPlusFullTime: 'NO'
     },
-    jobProfiles: [{
+    jobProfile: {   // ✅ Single object instead of array
       jobProfile: '',
       jobDesignation: '',
       placeOfPosting: '',
       jobDescription: '',
       annualPackage: '',
       breakageOfCTC: ''
-    }],
+    },
     selectionProcess: {
       prePlacementTalk: 'NO',
       onlineAssessment: 'NO',
@@ -72,38 +57,10 @@ const CreateJAF = () => {
       navigate('/recruiter/complete-profile');
       return;
     }
-    fetchRecruiterData();
   }, [recruiterId, profileCompleted]);
 
-  const fetchRecruiterData = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/recruiter/${userEmail}`);
-      const recruiter = response.data;
-      setRecruiterData(recruiter);
-      
-      // Pre-fill form with recruiter's profile data
-      setFormData(prev => ({
-        ...prev,
-        companyName: recruiter.companyName,
-        telephoneNo: recruiter.companyProfile?.telephoneNo || '',
-        emailAddress: recruiter.email,
-        website: recruiter.companyProfile?.website || '',
-        headHR: recruiter.companyProfile?.headHR || prev.headHR,
-        secondContactPerson: recruiter.companyProfile?.secondContactPerson || prev.secondContactPerson
-      }));
-    } catch (error) {
-      console.error('Error fetching recruiter data:', error);
-      toast.error('Error loading profile data', {
-        position: "bottom-center",
-        autoClose: 3000,
-        theme: "light",
-        transition: Bounce,
-      });
-    }
-  };
-
-  const handleInputChange = (field, value, index = null) => {
-    if (field.includes('.') && index === null) {
+  const handleInputChange = (field, value) => {
+    if (field.includes('.')) {
       const [parent, child] = field.split('.');
       setFormData(prev => ({
         ...prev,
@@ -112,60 +69,21 @@ const CreateJAF = () => {
           [child]: value
         }
       }));
-    } else if (index !== null) {
-      // Handle job profiles array
-      setFormData(prev => ({
-        ...prev,
-        jobProfiles: prev.jobProfiles.map((profile, i) => 
-          i === index ? { ...profile, [field]: value } : profile
-        )
-      }));
     } else {
       setFormData(prev => ({
         ...prev,
-        [field]: value
+        jobProfile: {
+          ...prev.jobProfile,
+          [field]: value
+        }
       }));
     }
   };
 
-  const addJobProfile = () => {
-    setFormData(prev => ({
-      ...prev,
-      jobProfiles: [...prev.jobProfiles, {
-        jobProfile: '',
-        jobDesignation: '',
-        placeOfPosting: '',
-        jobDescription: '',
-        annualPackage: '',
-        breakageOfCTC: ''
-      }]
-    }));
-  };
-
-  const removeJobProfile = (index) => {
-    if (formData.jobProfiles.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        jobProfiles: prev.jobProfiles.filter((_, i) => i !== index)
-      }));
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate required fields
-    if (!formData.companyName || !formData.telephoneNo || !formData.emailAddress || !formData.website) {
-      toast.error('Please fill in all company details', {
-        position: "bottom-center",
-        autoClose: 3000,
-        theme: "light",
-        transition: Bounce,
-      });
-      return;
-    }
-
-    // Validate at least one course is selected
+    // Validate at least one course
     if (formData.coursesAllowed.msc === 'No' && formData.coursesAllowed.mca === 'No') {
       toast.error('Please select at least one course', {
         position: "bottom-center",
@@ -176,10 +94,10 @@ const CreateJAF = () => {
       return;
     }
 
-    // Validate at least one recruitment type is selected
-    if (formData.recruitmentType.internship === 'NO' && 
-        formData.recruitmentType.fullTime === 'NO' && 
-        formData.recruitmentType.internshipPlusFullTime === 'NO') {
+    // Validate at least one recruitment type
+    if (formData.recruitmentType.internship === 'NO' &&
+      formData.recruitmentType.fullTime === 'NO' &&
+      formData.recruitmentType.internshipPlusFullTime === 'NO') {
       toast.error('Please select at least one recruitment type', {
         position: "bottom-center",
         autoClose: 3000,
@@ -190,11 +108,10 @@ const CreateJAF = () => {
     }
 
     // Validate job profiles
-    for (let i = 0; i < formData.jobProfiles.length; i++) {
-      const profile = formData.jobProfiles[i];
-      if (!profile.jobProfile || !profile.jobDesignation || !profile.placeOfPosting || 
-          !profile.jobDescription || !profile.annualPackage || !profile.breakageOfCTC) {
-        toast.error(`Please fill in all details for Job Profile ${i + 1}`, {
+    const profile = formData.jobProfile;
+      if (!profile.jobProfile || !profile.jobDesignation || !profile.placeOfPosting ||
+        !profile.jobDescription || !profile.annualPackage || !profile.breakageOfCTC) {
+        toast.error(`Please fill in all details for Job Profile`, {
           position: "bottom-center",
           autoClose: 3000,
           theme: "light",
@@ -202,20 +119,19 @@ const CreateJAF = () => {
         });
         return;
       }
-    }
 
     try {
       setLoading(true);
-      
+
       await axios.post(`http://localhost:5000/recruiter/${recruiterId}/jaf`, formData);
-      
+
       toast.success('JAF created successfully!', {
         position: "bottom-center",
         autoClose: 3000,
         theme: "light",
         transition: Bounce,
       });
-      
+
       navigate('/recruiter/home');
     } catch (error) {
       console.error('Error creating JAF:', error);
@@ -240,133 +156,77 @@ const CreateJAF = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Company Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-[#72265F]">Company Details</CardTitle>
-            <CardDescription>Basic information about your company</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Name of the Company *</Label>
-                <Input
-                  id="companyName"
-                  value={formData.companyName}
-                  onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="telephoneNo">Telephone Number *</Label>
-                <Input
-                  id="telephoneNo"
-                  type="tel"
-                  value={formData.telephoneNo}
-                  onChange={(e) => handleInputChange('telephoneNo', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="emailAddress">Email Address *</Label>
-                <Input
-                  id="emailAddress"
-                  type="email"
-                  value={formData.emailAddress}
-                  onChange={(e) => handleInputChange('emailAddress', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="website">Website *</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  value={formData.website}
-                  onChange={(e) => handleInputChange('website', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Contact Details */}
+        {/* Job Profiles at the top */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl text-[#72265F]">Contact Details</CardTitle>
-            <CardDescription>Primary and secondary contact information</CardDescription>
+            <CardTitle className="text-xl text-[#72265F]">Job Profile</CardTitle>
+            <CardDescription>Add details for the job profile</CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-6">
-            {/* Head HR */}
-            <div>
-              <h3 className="font-semibold text-gray-700 mb-3">Head HR</h3>
-              <div className="grid md:grid-cols-3 gap-4">
+            <div className="border rounded-lg p-6 space-y-4 relative">
+              <h3 className="font-semibold text-gray-700 mb-4">Job Profile</h3>
+
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="headHR.name">Name *</Label>
+                  <Label>Job Profile/Role *</Label>
                   <Input
-                    id="headHR.name"
-                    value={formData.headHR.name}
-                    onChange={(e) => handleInputChange('headHR.name', e.target.value)}
+                    value={formData.jobProfile.jobProfile}
+                    onChange={(e) => handleInputChange('jobProfile', e.target.value)}
+                    placeholder="e.g., Software Developer"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="headHR.email">Email *</Label>
+                  <Label>Job Designation *</Label>
                   <Input
-                    id="headHR.email"
-                    type="email"
-                    value={formData.headHR.email}
-                    onChange={(e) => handleInputChange('headHR.email', e.target.value)}
+                    value={formData.jobProfile.jobDesignation}
+                    onChange={(e) => handleInputChange('jobDesignation', e.target.value)}
+                    placeholder="e.g., Junior Developer"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="headHR.mobileNumber">Mobile Number *</Label>
+                  <Label>Place of Posting *</Label>
                   <Input
-                    id="headHR.mobileNumber"
-                    type="tel"
-                    value={formData.headHR.mobileNumber}
-                    onChange={(e) => handleInputChange('headHR.mobileNumber', e.target.value)}
+                    value={formData.jobProfile.placeOfPosting}
+                    onChange={(e) => handleInputChange('placeOfPosting', e.target.value)}
+                    placeholder="e.g., Bangalore, Delhi NCR"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Annual Package (CTC) *</Label>
+                  <Input
+                    value={formData.jobProfile.annualPackage}
+                    onChange={(e) => handleInputChange('annualPackage', e.target.value)}
+                    placeholder="e.g., 6-8 LPA"
                     required
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Second Contact Person */}
-            <div>
-              <h3 className="font-semibold text-gray-700 mb-3">Second Contact Person</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="secondContactPerson.name">Name *</Label>
-                  <Input
-                    id="secondContactPerson.name"
-                    value={formData.secondContactPerson.name}
-                    onChange={(e) => handleInputChange('secondContactPerson.name', e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="secondContactPerson.email">Email *</Label>
-                  <Input
-                    id="secondContactPerson.email"
-                    type="email"
-                    value={formData.secondContactPerson.email}
-                    onChange={(e) => handleInputChange('secondContactPerson.email', e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="secondContactPerson.mobileNumber">Mobile Number *</Label>
-                  <Input
-                    id="secondContactPerson.mobileNumber"
-                    type="tel"
-                    value={formData.secondContactPerson.mobileNumber}
-                    onChange={(e) => handleInputChange('secondContactPerson.mobileNumber', e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Job Description *</Label>
+                <Textarea
+                  value={formData.jobProfile.jobDescription}
+                  onChange={(e) => handleInputChange('jobDescription', e.target.value)}
+                  placeholder="Describe the role, responsibilities, and requirements..."
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Breakage of CTC *</Label>
+                <Textarea
+                  value={formData.jobProfile.breakageOfCTC}
+                  onChange={(e) => handleInputChange('breakageOfCTC', e.target.value)}
+                  placeholder="e.g., Basic: 4L, HRA: 1L, Other Allowances: 1L, etc."
+                  rows={3}
+                  required
+                />
               </div>
             </div>
           </CardContent>
@@ -423,7 +283,7 @@ const CreateJAF = () => {
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="internship">Internship Only</Label>
+                <Label>Internship Only</Label>
                 <Select
                   value={formData.recruitmentType.internship}
                   onValueChange={(value) => handleInputChange('recruitmentType.internship', value)}
@@ -438,7 +298,7 @@ const CreateJAF = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="fullTime">Full Time Only</Label>
+                <Label>Full Time Only</Label>
                 <Select
                   value={formData.recruitmentType.fullTime}
                   onValueChange={(value) => handleInputChange('recruitmentType.fullTime', value)}
@@ -453,7 +313,7 @@ const CreateJAF = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="internshipPlusFullTime">Internship + Full Time</Label>
+                <Label>Internship + Full Time</Label>
                 <Select
                   value={formData.recruitmentType.internshipPlusFullTime}
                   onValueChange={(value) => handleInputChange('recruitmentType.internshipPlusFullTime', value)}
@@ -468,105 +328,6 @@ const CreateJAF = () => {
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Job Profiles */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-[#72265F]">Job Profiles</CardTitle>
-            <CardDescription>Add details for each job profile you're offering</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {formData.jobProfiles.map((profile, index) => (
-              <div key={index} className="border rounded-lg p-6 space-y-4 relative">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">Job Profile {index + 1}</h3>
-                  {formData.jobProfiles.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeJobProfile(index)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Remove
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Job Profile/Role *</Label>
-                    <Input
-                      value={profile.jobProfile}
-                      onChange={(e) => handleInputChange('jobProfile', e.target.value, index)}
-                      placeholder="e.g., Software Developer"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Job Designation *</Label>
-                    <Input
-                      value={profile.jobDesignation}
-                      onChange={(e) => handleInputChange('jobDesignation', e.target.value, index)}
-                      placeholder="e.g., Junior Developer"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Place of Posting *</Label>
-                    <Input
-                      value={profile.placeOfPosting}
-                      onChange={(e) => handleInputChange('placeOfPosting', e.target.value, index)}
-                      placeholder="e.g., Bangalore, Delhi NCR"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Annual Package (CTC) *</Label>
-                    <Input
-                      value={profile.annualPackage}
-                      onChange={(e) => handleInputChange('annualPackage', e.target.value, index)}
-                      placeholder="e.g., 6-8 LPA"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Job Description *</Label>
-                  <Textarea
-                    value={profile.jobDescription}
-                    onChange={(e) => handleInputChange('jobDescription', e.target.value, index)}
-                    placeholder="Describe the role, responsibilities, and requirements..."
-                    rows={4}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Breakage of CTC *</Label>
-                  <Textarea
-                    value={profile.breakageOfCTC}
-                    onChange={(e) => handleInputChange('breakageOfCTC', e.target.value, index)}
-                    placeholder="e.g., Basic: 4L, HRA: 1L, Other Allowances: 1L, etc."
-                    rows={3}
-                    required
-                  />
-                </div>
-              </div>
-            ))}
-            
-            <Button
-              type="button"
-              onClick={addJobProfile}
-              variant="outline"
-              className="w-full"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Another Job Profile
-            </Button>
           </CardContent>
         </Card>
 
