@@ -100,7 +100,8 @@ export const updateCompany = async (req, res) => {
           applied_students: {
             email: email,
             resumeLink: resumeLink,
-            appliedAt: new Date()
+            appliedAt: new Date(),
+            status: 'Applied' // Default status
           }
         } 
       },
@@ -159,6 +160,98 @@ export const getAppliedStudents = async (req, res) => {
     console.error("Error fetching applied students:", error);
     res.status(500).json({ 
       message: 'Error fetching applied students', 
+      error: error.message 
+    });
+  }
+};
+
+// GET company by JAF ID
+export const getCompanyByJafId = async (req, res) => {
+  try {
+    const { jafId } = req.params;
+    
+    const company = await Company.findOne({ jafId: jafId });
+    if (!company) {
+      return res.status(404).json({ message: 'No company found for this JAF ID' });
+    }
+    
+    res.status(200).json(company);
+  } catch (error) {
+    console.error("Error fetching company by JAF ID:", error);
+    res.status(500).json({ 
+      message: 'Error fetching company by JAF ID', 
+      error: error.message 
+    });
+  }
+};
+
+// GET all companies created from JAFs by a specific recruiter
+export const getCompaniesByRecruiter = async (req, res) => {
+  try {
+    const { recruiterId } = req.params;
+    
+    // Import JAF model dynamically to avoid circular dependency
+    const { JAF } = await import('../Models/JAF.js');
+    
+    // First get all JAF IDs for this recruiter
+    const recruiterJafs = await JAF.find({ recruiterId: recruiterId }).select('_id');
+    const jafIds = recruiterJafs.map(jaf => jaf._id.toString());
+    
+    // Find companies linked to these JAFs
+    const companies = await Company.find({ jafId: { $in: jafIds } })
+      .sort({ created_at: -1 });
+    
+    res.status(200).json(companies);
+  } catch (error) {
+    console.error("Error fetching companies by recruiter:", error);
+    res.status(500).json({ 
+      message: 'Error fetching companies by recruiter', 
+      error: error.message 
+    });
+  }
+};
+
+// UPDATE student application status (for recruiters)
+export const updateStudentStatus = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { studentEmail, status } = req.body;
+    
+    if (!studentEmail || !status) {
+      return res.status(400).json({ 
+        message: 'Student email and status are required' 
+      });
+    }
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    // Find and update the specific student's status
+    const studentIndex = company.applied_students.findIndex(
+      student => student.email === studentEmail
+    );
+
+    if (studentIndex === -1) {
+      return res.status(404).json({ 
+        message: 'Student application not found' 
+      });
+    }
+
+    company.applied_students[studentIndex].status = status;
+    company.applied_students[studentIndex].statusUpdatedAt = new Date();
+    await company.save();
+
+    res.status(200).json({
+      message: 'Student status updated successfully',
+      updatedStudent: company.applied_students[studentIndex]
+    });
+
+  } catch (error) {
+    console.error("Error updating student status:", error);
+    res.status(500).json({ 
+      message: 'Error updating student status', 
       error: error.message 
     });
   }

@@ -27,6 +27,8 @@ import CreateJAF from './components/Recruiter/CreateJAF.jsx';
 import ViewJAF from './components/Recruiter/ViewJAF.jsx';
 import ViewProfile from './components/Recruiter/ViewProfile.jsx';
 import EditProfileRecruiter from './components/Recruiter/EditProfileRecruiter.jsx';
+import ViewRecruiters from './components/ViewRecruiters.jsx';
+import RecruiterProfileView from './components/RecruiterProfileView.jsx';
 
 
 export default function App() {
@@ -171,6 +173,25 @@ export default function App() {
           </RecruiterRoute>
         }
       />
+
+       {/* View Recruiters Routes - Coordinator only */}
+        <Route
+          path="/view-recruiters"
+          element={
+            <CoordinatorRoute>
+              <ViewRecruiters />
+            </CoordinatorRoute>
+          }
+        />
+        <Route
+          path="/view-recruiters/:companyName"
+          element={
+            <CoordinatorRoute>
+              <RecruiterProfileView />
+            </CoordinatorRoute>
+          }
+        />
+
       </Routes>
 
       <Footer />

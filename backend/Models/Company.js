@@ -9,10 +9,9 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    hiring_workflow : {
-        type : String,
-        required : true
-
+    hiring_workflow: {
+        type: String,
+        required: true
     },
     location: {
         type: String,
@@ -33,12 +32,21 @@ const CompanySchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            default: 'Applied'
+            default: 'Applied',
+            enum: [
+                'Applied',
+                'Shortlisted for OA',
+                'Shortlisted for Technical Round 1',
+                'Shortlisted for Technical Round 2',
+                'HR Selected',
+                'Final Selected',
+                'Rejected'
+            ]
         }
     }],
     job_type: {
         type: String,
-        enum: ['Full-time', 'Remote' , 'Internship', 'Intership + full-time'],
+        enum: ['Full-time', 'Remote', 'Internship', 'Internship + full-time'],
         required: true,
     },
     job_function: {
@@ -74,16 +82,22 @@ const CompanySchema = new mongoose.Schema({
         required: false,
     },
     logo: {
-        type: String, // URL or path to image
-        required: true,
-    },
-    JD : {
         type: String,
-        required: true
+        required: false,
+    },
+    JD: {
+        type: String,
+        required: false
     },
     application_deadline: {
         type: Date,
         required: false
+    },
+    // NEW: Link to JAF
+    jafId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'JAF',
+        required: false, // Optional since existing companies may not have JAF
     },
     created_at: {
         type: Date,

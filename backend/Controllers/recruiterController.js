@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Recruiter } from "../Models/Recruiters.js";
 import { JAF } from "../Models/JAF.js";
+import Company from '../Models/Company.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -292,5 +293,79 @@ export const deleteJAF = async (req, res) => {
   } catch (error) {
     console.error("Error deleting JAF:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+// Add this method to your recruiter controller file
+
+// ===============================
+// GET RECRUITER BY COMPANY NAME
+// ===============================
+export const getRecruiterByCompanyName = async (req, res) => {
+  try {
+    const { companyName } = req.params;
+
+    // Decode the company name in case it was URL encoded
+    const decodedCompanyName = decodeURIComponent(companyName);
+
+    const recruiter = await Recruiter.findOne({ 
+      companyName: { $regex: new RegExp(`^${decodedCompanyName}$`, 'i') } // Case insensitive search
+    }).populate('jafs');
+
+    if (!recruiter) {
+      return res.status(404).json({ message: "Recruiter not found for this company." });
+    }
+
+    res.status(200).json({
+      id: recruiter._id,
+      email: recruiter.email,
+      companyName: recruiter.companyName,
+      registered: recruiter.registered,
+      profileCompleted: recruiter.profileCompleted,
+      companyProfile: recruiter.companyProfile,
+      jafs: recruiter.jafs,
+      createdAt: recruiter.createdAt,
+      updatedAt: recruiter.updatedAt
+    });
+  } catch (error) {
+    console.error("Error fetching recruiter by company name:", error);
+    res.status(500).json({ 
+      message: "Internal Server Error", 
+      error: error.message 
+    });
+  }
+};
+
+
+// ===============================
+// GET ALL RECRUITERS
+// ===============================
+export const getAllRecruiters = async (req, res) => {
+  try {
+    // Fetch all recruiters with basic information
+    const recruiters = await Recruiter.find({})
+      .populate('jafs')
+      .sort({ createdAt: -1 }); // Sort by newest first
+
+    // Transform the data to include only necessary information
+    const recruitersData = recruiters.map(recruiter => ({
+      _id: recruiter._id,
+      email: recruiter.email,
+      companyName: recruiter.companyName,
+      registered: recruiter.registered,
+      profileCompleted: recruiter.profileCompleted,
+      companyProfile: recruiter.companyProfile,
+      jafCount: recruiter.jafs.length,
+      createdAt: recruiter.createdAt,
+      updatedAt: recruiter.updatedAt
+    }));
+
+    res.status(200).json(recruitersData);
+  } catch (error) {
+    console.error("Error fetching all recruiters:", error);
+    res.status(500).json({ 
+      message: "Internal Server Error", 
+      error: error.message 
+    });
   }
 };

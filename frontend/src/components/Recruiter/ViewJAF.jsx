@@ -21,16 +21,13 @@ import {
   Calendar,
   CheckCircle,
   XCircle,
-  Edit,
-  FileText,
   Loader2,
   AlertCircle,
   Target,
   Award,
   Clock,
-  Code,
-  Star,
-  TrendingUp
+  FileText,
+  BookOpen
 } from 'lucide-react';
 
 const ViewJAF = () => {
@@ -110,11 +107,6 @@ const ViewJAF = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  const formatPackage = (amount) => {
-    if (!amount) return 'Not specified';
-    return `₹${amount} LPA`;
   };
 
   if (loading) {
@@ -304,12 +296,40 @@ const ViewJAF = () => {
           </Card>
         )}
 
-        {/* Job Details */}
+        {/* Courses Allowed */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-[#72265F] flex items-center">
+              <BookOpen className="w-5 h-5 mr-2" />
+              Courses Allowed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">M.Sc Computer Science</span>
+                <Badge variant={jaf.coursesAllowed?.msc === 'Yes' ? 'default' : 'secondary'} 
+                       className={jaf.coursesAllowed?.msc === 'Yes' ? 'bg-green-100 text-green-800' : ''}>
+                  {jaf.coursesAllowed?.msc || 'No'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">MCA</span>
+                <Badge variant={jaf.coursesAllowed?.mca === 'Yes' ? 'default' : 'secondary'}
+                       className={jaf.coursesAllowed?.mca === 'Yes' ? 'bg-green-100 text-green-800' : ''}>
+                  {jaf.coursesAllowed?.mca || 'No'}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Job Profile Details */}
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-[#72265F] flex items-center">
               <Briefcase className="w-5 h-5 mr-2" />
-              Job Details
+              Job Profile
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -319,15 +339,15 @@ const ViewJAF = () => {
                   <div className="flex items-center gap-3">
                     <Target className="w-4 h-4 text-gray-500" />
                     <div>
-                      <p className="text-sm text-gray-500">Job Profile</p>
-                      <p className="font-semibold text-lg">{jaf.jobDetails?.jobProfile || 'Not specified'}</p>
+                      <p className="text-sm text-gray-500">Job Profile/Role</p>
+                      <p className="font-semibold text-lg">{jaf.jobProfile?.jobProfile || 'Not specified'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Award className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Job Designation</p>
-                      <p className="font-semibold">{jaf.jobDetails?.jobDesignation || 'Not specified'}</p>
+                      <p className="font-semibold">{jaf.jobProfile?.jobDesignation || 'Not specified'}</p>
                     </div>
                   </div>
                 </div>
@@ -336,17 +356,33 @@ const ViewJAF = () => {
                     <MapPin className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Place of Posting</p>
-                      <p className="font-semibold">{jaf.jobDetails?.placeOfPosting || 'Not specified'}</p>
+                      <p className="font-semibold">{jaf.jobProfile?.placeOfPosting || 'Not specified'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-500">Annual Package</p>
+                      <p className="font-semibold text-lg text-green-600">{jaf.jobProfile?.annualPackage || 'Not specified'}</p>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {jaf.jobDetails?.jobDescription && (
+              {jaf.jobProfile?.jobDescription && (
                 <div>
                   <p className="text-sm text-gray-500 mb-2">Job Description</p>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm leading-relaxed">{jaf.jobDetails.jobDescription}</p>
+                    <p className="text-sm leading-relaxed">{jaf.jobProfile.jobDescription}</p>
+                  </div>
+                </div>
+              )}
+
+              {jaf.jobProfile?.breakageOfCTC && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">CTC Breakdown</p>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm leading-relaxed">{jaf.jobProfile.breakageOfCTC}</p>
                   </div>
                 </div>
               )}
@@ -354,72 +390,92 @@ const ViewJAF = () => {
           </CardContent>
         </Card>
 
-        {/* Recruitment Type & Salary */}
+        {/* Recruitment Type */}
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-[#72265F] flex items-center">
-              <DollarSign className="w-5 h-5 mr-2" />
-              Recruitment Type & Compensation
+              <FileText className="w-5 h-5 mr-2" />
+              Recruitment Type
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Recruitment Type */}
-              {jaf.recruitmentType && (
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-4">Recruitment Type</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span>Internship</span>
-                      <Badge variant={jaf.recruitmentType.internship ? 'default' : 'secondary'}>
-                        {jaf.recruitmentType.internship ? 'Yes' : 'No'}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Full Time</span>
-                      <Badge variant={jaf.recruitmentType.fullTime ? 'default' : 'secondary'}>
-                        {jaf.recruitmentType.fullTime ? 'Yes' : 'No'}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Internship + Full Time</span>
-                      <Badge variant={jaf.recruitmentType.internshipPlusFullTime ? 'default' : 'secondary'}>
-                        {jaf.recruitmentType.internshipPlusFullTime ? 'Yes' : 'No'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Salary Details */}
-              {jaf.salaryDetails && (
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-4">Compensation Details</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-gray-500">Annual Package</p>
-                      <p className="font-semibold text-lg text-green-600">
-                        {formatPackage(jaf.salaryDetails.annualPackage)}
-                      </p>
-                    </div>
-                    {jaf.salaryDetails.stipend && (
-                      <div>
-                        <p className="text-sm text-gray-500">Stipend</p>
-                        <p className="font-semibold">₹{jaf.salaryDetails.stipend}/month</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Internship Only</span>
+                <Badge variant={jaf.recruitmentType?.internship === 'YES' ? 'default' : 'secondary'}
+                       className={jaf.recruitmentType?.internship === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                  {jaf.recruitmentType?.internship || 'NO'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Full Time Only</span>
+                <Badge variant={jaf.recruitmentType?.fullTime === 'YES' ? 'default' : 'secondary'}
+                       className={jaf.recruitmentType?.fullTime === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                  {jaf.recruitmentType?.fullTime || 'NO'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Internship + Full Time</span>
+                <Badge variant={jaf.recruitmentType?.internshipPlusFullTime === 'YES' ? 'default' : 'secondary'}
+                       className={jaf.recruitmentType?.internshipPlusFullTime === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                  {jaf.recruitmentType?.internshipPlusFullTime || 'NO'}
+                </Badge>
+              </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {jaf.salaryDetails?.ctcBreakage && (
+        {/* Selection Process */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-[#72265F] flex items-center">
+              <GraduationCap className="w-5 h-5 mr-2" />
+              Selection Process
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span>Pre-Placement Talk</span>
+                  <Badge variant={jaf.selectionProcess?.prePlacementTalk === 'YES' ? 'default' : 'secondary'}
+                         className={jaf.selectionProcess?.prePlacementTalk === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                    {jaf.selectionProcess?.prePlacementTalk || 'NO'}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Online Assessment</span>
+                  <Badge variant={jaf.selectionProcess?.onlineAssessment === 'YES' ? 'default' : 'secondary'}
+                         className={jaf.selectionProcess?.onlineAssessment === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                    {jaf.selectionProcess?.onlineAssessment || 'NO'}
+                  </Badge>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span>Technical Interview</span>
+                  <Badge variant={jaf.selectionProcess?.personalTechnicalInterview === 'YES' ? 'default' : 'secondary'}
+                         className={jaf.selectionProcess?.personalTechnicalInterview === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                    {jaf.selectionProcess?.personalTechnicalInterview || 'NO'}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>HR Round</span>
+                  <Badge variant={jaf.selectionProcess?.hrRound === 'YES' ? 'default' : 'secondary'}
+                         className={jaf.selectionProcess?.hrRound === 'YES' ? 'bg-green-100 text-green-800' : ''}>
+                    {jaf.selectionProcess?.hrRound || 'NO'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            {jaf.selectionProcess?.anyOtherRounds && (
               <>
                 <Separator className="my-4" />
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">CTC Breakdown</p>
+                  <p className="text-sm text-gray-500 mb-2">Other Rounds</p>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm leading-relaxed">{jaf.salaryDetails.ctcBreakage}</p>
+                    <p className="text-sm leading-relaxed">{jaf.selectionProcess.anyOtherRounds}</p>
                   </div>
                 </div>
               </>
@@ -427,153 +483,35 @@ const ViewJAF = () => {
           </CardContent>
         </Card>
 
-        {/* Requirements */}
-        {jaf.requirements && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-[#72265F] flex items-center">
-                <GraduationCap className="w-5 h-5 mr-2" />
-                Requirements & Eligibility
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  {/* Required Skills */}
-                  {jaf.requirements.requiredSkills?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-gray-700 mb-2 flex items-center">
-                        <Code className="w-4 h-4 mr-2" />
-                        Required Skills
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {jaf.requirements.requiredSkills.map((skill, index) => (
-                          <Badge key={index} variant="default" className="bg-red-100 text-red-800">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Eligible Branches */}
-                  {jaf.requirements.eligibleBranches?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-gray-700 mb-2">Eligible Branches</h3>
-                      <div className="space-y-1">
-                        {jaf.requirements.eligibleBranches.map((branch, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm">{branch}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  {/* Preferred Skills */}
-                  {jaf.requirements.preferredSkills?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-gray-700 mb-2 flex items-center">
-                        <Star className="w-4 h-4 mr-2" />
-                        Preferred Skills
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {jaf.requirements.preferredSkills.map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Other Requirements */}
-                  <div className="space-y-3">
-                    {jaf.requirements.minimumCGPA && (
-                      <div>
-                        <p className="text-sm text-gray-500">Minimum CGPA</p>
-                        <p className="font-semibold">{jaf.requirements.minimumCGPA}</p>
-                      </div>
-                    )}
-                    {jaf.requirements.experienceRequired && (
-                      <div>
-                        <p className="text-sm text-gray-500">Experience Required</p>
-                        <p className="font-semibold">{jaf.requirements.experienceRequired}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Timeline */}
-        {jaf.placementTimeline && (jaf.placementTimeline.onlineCodingTestDate || jaf.placementTimeline.interviewDate) && (
+        {(jaf.timeline?.onlineCodingTestDate || jaf.timeline?.interviewDate) && (
           <Card>
             <CardHeader>
               <CardTitle className="text-xl text-[#72265F] flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
-                Placement Timeline
+                Timeline
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
-                {jaf.placementTimeline.onlineCodingTestDate && (
+                {jaf.timeline.onlineCodingTestDate && (
                   <div className="flex items-center gap-3">
                     <Clock className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Online Coding Test Date</p>
-                      <p className="font-semibold">{formatDateTime(jaf.placementTimeline.onlineCodingTestDate)}</p>
+                      <p className="font-semibold">{formatDate(jaf.timeline.onlineCodingTestDate)}</p>
                     </div>
                   </div>
                 )}
-                {jaf.placementTimeline.interviewDate && (
+                {jaf.timeline.interviewDate && (
                   <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-500">Interview Date</p>
-                      <p className="font-semibold">{formatDateTime(jaf.placementTimeline.interviewDate)}</p>
+                      <p className="font-semibold">{formatDate(jaf.timeline.interviewDate)}</p>
                     </div>
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Application Statistics */}
-        {jaf.applicationStats && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-[#72265F] flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                Application Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {jaf.applicationStats.totalApplications || 0}
-                  </div>
-                  <div className="text-sm text-gray-500">Total Applications</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {jaf.applicationStats.shortlisted || 0}
-                  </div>
-                  <div className="text-sm text-gray-500">Shortlisted</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {jaf.applicationStats.selected || 0}
-                  </div>
-                  <div className="text-sm text-gray-500">Selected</div>
-                </div>
               </div>
             </CardContent>
           </Card>

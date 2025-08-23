@@ -7,11 +7,10 @@ import studentRoutes from './Routes/studentRoutes.js';
 import coordinatorRoutes from './Routes/coordinatorRoutes.js';
 import announcementRoutes from './Routes/announcementRoutes.js';
 import companyRoutes from './Routes/CompanyRoutes.js';
-import recuiterRoutes from './Routes/recruiterRoutes.js'
+import recruiterRoutes from './Routes/recruiterRoutes.js'; // Fixed typo
 
 dotenv.config();
 const app = express();
-
 
 app.use(express.json());
 app.use(cors());
@@ -20,11 +19,16 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
+// Mount routes with proper organization
 app.use('/', highlightRoutes);
 app.use('/', studentRoutes);
 app.use('/', announcementRoutes);
 app.use('/', coordinatorRoutes);
-app.use("/", companyRoutes)
-app.use("/", recuiterRoutes)
+app.use('/', companyRoutes);
+
+// Mount recruiter routes with proper prefixes
+app.use('/recruiter', recruiterRoutes);  // For login/register: /recruiter/login, /recruiter/register
+app.use('/recruiters', recruiterRoutes); // For getting all recruiters: /recruiters
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

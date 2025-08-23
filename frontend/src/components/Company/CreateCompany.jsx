@@ -32,7 +32,8 @@ const CreateCompany = () => {
         applicable_courses: '',
         logo: '',
         JD: '',
-        application_deadline: ''
+        application_deadline: '',
+        jafId: '' // NEW: JAF ID field
     });
 
     const [companies, setCompanies] = useState([]);
@@ -42,6 +43,14 @@ const CreateCompany = () => {
     const [showModal, setShowModal] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState({});
+
+    // NEW: JAF validation state
+    const [jafValidation, setJafValidation] = useState({
+        isValidating: false,
+        isValid: false,
+        jafDetails: null,
+        validationMessage: ''
+    });
 
     useEffect(() => {
         fetchCompanies();
@@ -57,6 +66,95 @@ const CreateCompany = () => {
         }
     };
 
+    // NEW: Validate JAF ID function
+    const validateJafId = async (jafId) => {
+        if (!jafId.trim()) {
+            setJafValidation({
+                isValidating: false,
+                isValid: false,
+                jafDetails: null,
+                validationMessage: ''
+            });
+            return;
+        }
+
+        setJafValidation(prev => ({ ...prev, isValidating: true }));
+        
+        try {
+            const response = await axios.get(`http://localhost:5000/jaf/${jafId}`);
+            const jafData = response.data;
+            
+            // Check if JAF is already linked to a company
+            const existingCompany = await axios.get(`http://localhost:5000/companies/by-jaf/${jafId}`).catch(() => null);
+            
+            if (existingCompany?.data) {
+                setJafValidation({
+                    isValidating: false,
+                    isValid: false,
+                    jafDetails: null,
+                    validationMessage: '❌ This JAF is already linked to a company'
+                });
+                return;
+            }
+
+            // Auto-populate form fields from JAF data
+            setFormData(prev => ({
+                ...prev,
+                title: jafData.recruiterId?.companyName || prev.title,
+                role: jafData.jobProfile?.jobDesignation || prev.role,
+                location: jafData.jobProfile?.placeOfPosting || prev.location,
+                job_profile: jafData.jobProfile?.jobProfile || prev.job_profile,
+                ctc: jafData.jobProfile?.annualPackage || prev.ctc,
+                description: jafData.jobProfile?.jobDescription || prev.description,
+                // Map recruitment type to job_type
+                job_type: jafData.recruitmentType?.fullTime === 'YES' ? 'Full-time' :
+                         jafData.recruitmentType?.internship === 'YES' ? 'Internship' :
+                         jafData.recruitmentType?.internshipPlusFullTime === 'YES' ? 'Internship + full-time' :
+                         'Full-time',
+                // Map courses to applicable_courses
+                applicable_courses: [
+                    ...(jafData.coursesAllowed?.msc === 'Yes' ? ['MSc'] : []),
+                    ...(jafData.coursesAllowed?.mca === 'Yes' ? ['MCA'] : [])
+                ].join(', '),
+                hiring_workflow: [
+                    ...(jafData.selectionProcess?.prePlacementTalk === 'YES' ? ['Pre-Placement Talk'] : []),
+                    ...(jafData.selectionProcess?.onlineAssessment === 'YES' ? ['Online Assessment'] : []),
+                    ...(jafData.selectionProcess?.personalTechnicalInterview === 'YES' ? ['Technical Interview'] : []),
+                    ...(jafData.selectionProcess?.hrRound === 'YES' ? ['HR Round'] : []),
+                    ...(jafData.selectionProcess?.anyOtherRounds ? [jafData.selectionProcess.anyOtherRounds] : [])
+                ].join(' → ')
+            }));
+            
+            setJafValidation({
+                isValidating: false,
+                isValid: true,
+                jafDetails: jafData,
+                validationMessage: '✅ JAF found and form auto-populated'
+            });
+            
+        } catch (error) {
+            console.error('JAF validation error:', error);
+            setJafValidation({
+                isValidating: false,
+                isValid: false,
+                jafDetails: null,
+                validationMessage: '❌ JAF not found or invalid'
+            });
+        }
+    };
+
+    // NEW: Handle JAF ID change with debounce
+    const handleJafIdChange = (e) => {
+        const jafId = e.target.value;
+        setFormData(prev => ({ ...prev, jafId }));
+        
+        // Debounce validation
+        clearTimeout(window.jafValidationTimeout);
+        window.jafValidationTimeout = setTimeout(() => {
+            validateJafId(jafId);
+        }, 500);
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -68,22 +166,30 @@ const CreateCompany = () => {
         setSuccess('');
         setError('');
 
+        // Validate JAF ID if provided
+        if (formData.jafId && !jafValidation.isValid) {
+            setError('❌ Please provide a valid JAF ID or leave it empty');
+            setLoading(false);
+            return;
+        }
+
         try {
             const payload = {
                 ...formData,
                 required_skills: formData.required_skills.split(',').map((s) => s.trim()).filter(s => s.length > 0),
                 applicable_courses: formData.applicable_courses.split(',').map((s) => s.trim()).filter(s => s.length > 0),
                 // Convert empty string to null for optional deadline
-                application_deadline: formData.application_deadline ? new Date(formData.application_deadline) : null
+                application_deadline: formData.application_deadline ? new Date(formData.application_deadline) : null,
+                // Include JAF ID if provided
+                jafId: formData.jafId || null
             };
             
             console.log('Sending payload:', payload);
             
-            // Fixed: Use correct endpoint - /company instead of /companies
             const response = await axios.post('http://localhost:5000/company', payload);
             console.log('Response:', response.data);
             
-            setSuccess('✅ Company created successfully!');
+            setSuccess('✅ Company created successfully!' + (formData.jafId ? ' (Linked to JAF)' : ''));
             setFormData({
                 title: '',
                 role: '',
@@ -100,8 +206,18 @@ const CreateCompany = () => {
                 applicable_courses: '',
                 logo: '',
                 JD: '',
-                application_deadline: ''
+                application_deadline: '',
+                jafId: ''
             });
+            
+            // Reset JAF validation
+            setJafValidation({
+                isValidating: false,
+                isValid: false,
+                jafDetails: null,
+                validationMessage: ''
+            });
+            
             fetchCompanies(); // Refresh the companies list
         } catch (err) {
             console.error('Full error:', err);
@@ -142,10 +258,17 @@ const CreateCompany = () => {
             applicable_courses: '',
             logo: '',
             JD: '',
-            application_deadline: ''
+            application_deadline: '',
+            jafId: ''
         });
         setSuccess('');
         setError('');
+        setJafValidation({
+            isValidating: false,
+            isValid: false,
+            jafDetails: null,
+            validationMessage: ''
+        });
     };
 
     const confirmDelete = (id) => {
@@ -156,14 +279,12 @@ const CreateCompany = () => {
 
     const deleteCompany = async () => {
         try {
-            // Fixed: Use correct endpoint - /company/:id instead of /companies/:id
             await axios.delete(`http://localhost:5000/company/${deleteId}`);
             setCompanies(companies.filter(company => company._id !== deleteId));
             setShowModal(false);
-            setDeleteId(null); // Clear the deleteId
+            setDeleteId(null);
             setSuccess('✅ Company deleted successfully!');
             
-            // Clear success message after 3 seconds
             setTimeout(() => {
                 setSuccess('');
             }, 3000);
@@ -173,7 +294,6 @@ const CreateCompany = () => {
             setShowModal(false);
             setDeleteId(null);
             
-            // Clear error message after 5 seconds
             setTimeout(() => {
                 setError('');
             }, 5000);
@@ -226,6 +346,34 @@ const CreateCompany = () => {
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid w-full items-center gap-4">
+                                    {/* NEW: JAF ID Field */}
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="jafId">JAF ID (Optional)</Label>
+                                        <Input
+                                            id="jafId"
+                                            name="jafId"
+                                            value={formData.jafId}
+                                            onChange={handleJafIdChange}
+                                            placeholder="Enter JAF Object ID to auto-populate form"
+                                            className={`${jafValidation.isValid ? 'border-green-500' : 
+                                                       jafValidation.validationMessage && !jafValidation.isValid ? 'border-red-500' : ''}`}
+                                        />
+                                        {jafValidation.isValidating && (
+                                            <p className="text-sm text-blue-600">🔍 Validating JAF ID...</p>
+                                        )}
+                                        {jafValidation.validationMessage && (
+                                            <p className={`text-sm ${jafValidation.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                                                {jafValidation.validationMessage}
+                                            </p>
+                                        )}
+                                        {jafValidation.jafDetails && (
+                                            <div className="text-xs bg-green-50 p-2 rounded border border-green-200">
+                                                <p><strong>Company:</strong> {jafValidation.jafDetails.recruiterId?.companyName}</p>
+                                                <p><strong>Position:</strong> {jafValidation.jafDetails.jobProfile?.jobDesignation}</p>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     <div className="flex flex-col space-y-1.5">
                                         <Label htmlFor="title">Company Title *</Label>
                                         <Input
@@ -509,6 +657,12 @@ const CreateCompany = () => {
                                                         <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">Expired</span>
                                                     )}
                                                 </p>
+                                                {/* NEW: Show JAF linkage */}
+                                                {company.jafId && (
+                                                    <p className="text-xs text-blue-600 font-medium">
+                                                        🔗 Linked to JAF: {company.jafId}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
 

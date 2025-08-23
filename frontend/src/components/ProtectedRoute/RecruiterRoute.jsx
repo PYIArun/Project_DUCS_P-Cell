@@ -1,6 +1,6 @@
 // ProtectedRoute.js
 import { Navigate } from "react-router-dom";
-import {jwtDecode} from "jwt-decode"; // npm install jwt-decode
+import {jwtDecode} from "jwt-decode"; 
 
 const ProtectedRoute = ({ allowedRoles, children }) => {
   const token = sessionStorage.getItem("recruiterToken");

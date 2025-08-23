@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '.././context/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Trash2, Briefcase, Calendar, MapPin, DollarSign, Users, X, Copy, Check, Building } from "lucide-react";
+import { Eye, Briefcase, Calendar, MapPin, DollarSign, Users, X, Copy, Check, Building, ArrowLeft } from "lucide-react";
 import { toast, Bounce } from 'react-toastify';
 
-const RecruiterHome = () => {
+const RecruiterProfileView = () => {
+  const [recruiterData, setRecruiterData] = useState(null);
   const [jafs, setJafs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAppliedStudentsModal, setShowAppliedStudentsModal] = useState(false);
@@ -17,7 +18,8 @@ const RecruiterHome = () => {
   const [studentsLoading, setStudentsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [linkedCompanies, setLinkedCompanies] = useState({});
-  const { recruiterId, profileCompleted, role } = useAuth();
+  const { companyName } = useParams();
+  const { role } = useAuth();
   const navigate = useNavigate();
 
   // Status options for dropdown
@@ -32,19 +34,33 @@ const RecruiterHome = () => {
   ];
 
   useEffect(() => {
-    if (!recruiterId) return;
-    fetchJAFs();
-    fetchLinkedCompanies();
-  }, [recruiterId]);
+    if (companyName) {
+      fetchRecruiterByCompanyName();
+    }
+  }, [companyName]);
 
-  const fetchJAFs = async () => {
+  const fetchRecruiterByCompanyName = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/recruiter/${recruiterId}/jafs`);
-      setJafs(response.data);
+      
+      // Decode the company name from URL
+      const decodedCompanyName = decodeURIComponent(companyName);
+      
+      // First, fetch recruiter by company name
+      const recruiterResponse = await axios.get(`http://localhost:5000/recruiter/company/${encodeURIComponent(decodedCompanyName)}`);
+      const recruiterData = recruiterResponse.data;
+      setRecruiterData(recruiterData);
+      
+      // Then fetch JAFs for this recruiter
+      const jafsResponse = await axios.get(`http://localhost:5000/recruiter/${recruiterData.id}/jafs`);
+      setJafs(jafsResponse.data);
+      
+      // Finally, fetch linked companies
+      await fetchLinkedCompanies(recruiterData.id);
+      
     } catch (error) {
-      console.error('Error fetching JAFs:', error);
-      toast.error('Error fetching your job applications', {
+      console.error('Error fetching recruiter data:', error);
+      toast.error('Error fetching recruiter information', {
         position: "bottom-center",
         autoClose: 3000,
         theme: "light",
@@ -55,7 +71,7 @@ const RecruiterHome = () => {
     }
   };
 
-  const fetchLinkedCompanies = async () => {
+  const fetchLinkedCompanies = async (recruiterId) => {
     try {
       const response = await axios.get(`http://localhost:5000/companies/recruiter/${recruiterId}`);
       const companies = response.data;
@@ -71,36 +87,11 @@ const RecruiterHome = () => {
       setLinkedCompanies(companyMap);
     } catch (error) {
       console.error('Error fetching linked companies:', error);
-      // Don't show error toast for this as it's supplementary data
     }
   };
 
   const handleViewJAF = (jafId) => {
     navigate(`/recruiter/jaf/${jafId}`);
-  };
-
-  const handleDeleteJAF = async (jafId) => {
-    if (window.confirm('Are you sure you want to delete this JAF?')) {
-      try {
-        await axios.delete(`http://localhost:5000/jaf/${jafId}`);
-        toast.success('JAF deleted successfully', {
-          position: "bottom-center",
-          autoClose: 3000,
-          theme: "light",
-          transition: Bounce,
-        });
-        fetchJAFs();
-        fetchLinkedCompanies(); // Refresh linked companies
-      } catch (error) {
-        console.error('Error deleting JAF:', error);
-        toast.error('Error deleting JAF', {
-          position: "bottom-center",
-          autoClose: 3000,
-          theme: "light",
-          transition: Bounce,
-        });
-      }
-    }
   };
 
   const copyToClipboard = async (id) => {
@@ -404,75 +395,111 @@ const RecruiterHome = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[75rem] mx-auto">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#72265F] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading recruiter information...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!recruiterData) {
+    return (
+      <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[75rem] mx-auto">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Recruiter not found</h2>
+          <p className="text-gray-600 mb-4">No recruiter found for company: {companyName}</p>
+          <Button
+            onClick={() => navigate('/view-recruiters')}
+            className="bg-[#72265F] hover:bg-[#913e7c] text-white"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Recruiters
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[75rem] mx-auto">
       {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-[#72265F] text-left">Recruiter Dashboard</h1>
-            <p className="text-gray-600 mt-2">Welcome back! Manage your job application forms.</p>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => navigate('/view-recruiters')}
+              variant="outline"
+              size="sm"
+              className="text-[#72265F] border-[#72265F] hover:bg-[#72265F] hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-[#72265F] text-left">
+                {recruiterData.companyName} - Recruiter Profile
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Viewing JAFs and applications for {recruiterData.companyName}
+              </p>
+            </div>
           </div>
-          <Button
-            onClick={() => navigate('/recruiter/create-jaf')}
-            disabled={!profileCompleted}
-            className="bg-[#72265F] hover:bg-[#913e7c] text-white shadow-lg"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create JAF
-          </Button>
         </div>
 
-        {!profileCompleted && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800">
-              <strong>Complete your profile first</strong> to create Job Application Forms.{' '}
-              <span
-                className="underline cursor-pointer font-semibold"
-                onClick={() => navigate('/recruiter/complete-profile')}
-              >
-                Complete Profile
-              </span>
-            </p>
+        {/* Recruiter Details */}
+        <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Email</p>
+              <p className="font-medium">{recruiterData.email}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Profile Status</p>
+              <Badge className={recruiterData.profileCompleted ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                {recruiterData.profileCompleted ? 'Complete' : 'Incomplete'}
+              </Badge>
+            </div>
+            {recruiterData.companyProfile && (
+              <>
+                <div>
+                  <p className="text-sm text-gray-600">Website</p>
+                  <p className="font-medium">{recruiterData.companyProfile.website || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Phone</p>
+                  <p className="font-medium">{recruiterData.companyProfile.telephoneNo || 'N/A'}</p>
+                </div>
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* JAFs Section */}
       <div className="bg-white rounded-2xl border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-[#72265F]">Your JAFs & Companies</h2>
+          <h2 className="text-xl font-semibold text-[#72265F]">JAFs & Companies</h2>
           <div className="text-sm text-gray-500">
             {jafs.length} application{jafs.length !== 1 ? 's' : ''}
           </div>
         </div>
 
         <div className="p-6">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#72265F] mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading your JAFs...</p>
-              </div>
-            </div>
-          ) : jafs.length === 0 ? (
+          {jafs.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
                 <Briefcase className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No JAFs created yet</h3>
-              <p className="text-gray-500 mb-4">
-                Create your first Job Application Form to start recruiting students.
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No JAFs created</h3>
+              <p className="text-gray-500">
+                This recruiter hasn't created any Job Application Forms yet.
               </p>
-              {profileCompleted && (
-                <Button
-                  onClick={() => navigate('/recruiter/create-jaf')}
-                  className="bg-[#72265F] hover:bg-[#913e7c] text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Your First JAF
-                </Button>
-              )}
             </div>
           ) : (
             <div className="grid gap-6">
@@ -485,9 +512,7 @@ const RecruiterHome = () => {
                     {/* JAF ID Section */}
                     <div className="px-6 pt-4 pb-2 bg-gray-50 border-b border-gray-100">
                       <div className="flex items-center justify-between">
-                        
-                        {role=='PlacementCoordinator' && 
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                           <label className="text-xs font-medium text-gray-600">JAF ID:</label>
                           <div className="flex items-center gap-2">
                             <input
@@ -509,8 +534,6 @@ const RecruiterHome = () => {
                             </button>
                           </div>
                         </div>
-                        }
-                        
                         
                         {/* Company Status Indicator */}
                         <div className="flex items-center gap-2">
@@ -562,7 +585,7 @@ const RecruiterHome = () => {
                                 <strong>Linked Company:</strong> {linkedCompany.title}
                               </p>
                               <p className="text-xs text-blue-600">
-                                Students can now apply through the company listing
+                                Students can apply through the company listing
                               </p>
                             </div>
                           )}
@@ -645,9 +668,6 @@ const RecruiterHome = () => {
                           Created on {new Date(jaf.createdAt).toLocaleDateString("en-IN")}
                         </div>
                         <div className="flex gap-2">
-                          
-                          {/* Only recruiter can view the applied student on their page */}
-                          {role=='Recruiter' && 
                           <Button
                             variant="outline"
                             size="sm"
@@ -657,7 +677,6 @@ const RecruiterHome = () => {
                             <Users className="w-4 h-4 mr-1" />
                             Applied Students ({applicantCount})
                           </Button>
-                          }
                           
                           <Button
                             variant="outline"
@@ -666,20 +685,8 @@ const RecruiterHome = () => {
                             className="text-[#72265F] border-[#72265F] hover:bg-[#72265F] hover:text-white"
                           >
                             <Eye className="w-4 h-4 mr-1" />
-                            View
+                            View JAF
                           </Button>
-                          {role=='Recruiter' && 
-                            <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteJAF(jaf._id)}
-                            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
-                          </Button>
-                          }
-                          
                         </div>
                       </div>
                     </CardContent>
@@ -729,4 +736,4 @@ const RecruiterHome = () => {
   );
 };
 
-export default RecruiterHome;
+export default RecruiterProfileView;

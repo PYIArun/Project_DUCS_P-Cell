@@ -10,10 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star, Building, Briefcase } from "lucide-react";
+import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star, Building, Briefcase, Users } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from ".././context/AuthContext"; 
 import { Eye, Edit } from 'lucide-react';
+
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -215,6 +216,14 @@ const Header = () => {
                     >
                       <User className="mr-2 h-4 w-4" />
                       <span>Student Home</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate("/view-recruiters")}
+                      className="hover:bg-[#f3e8f5] cursor-pointer"
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>View Recruiters</span>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
