@@ -450,7 +450,7 @@ const ViewCompany = () => {
               <button
                 onClick={() => setShowPopup(true)}
                 disabled={isApplying || !userEmail}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-3 bg-[#72265F] text-white rounded-lg font-medium hover:bg-[#5f1e4e] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {isApplying ? "Applying..." : "Apply Now"}
               </button>
@@ -671,7 +671,7 @@ const ViewCompany = () => {
                 <button
                   onClick={handleApply}
                   disabled={!isChecked || !resumeLink.trim() || isApplying}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 bg-[#72265F] text-white rounded-lg hover:bg-[#651c53] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isApplying ? "Submitting..." : "Submit Application"}
                 </button>
