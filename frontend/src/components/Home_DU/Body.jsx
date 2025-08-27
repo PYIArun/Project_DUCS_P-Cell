@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/card";
 import { FaRegFilePdf } from "react-icons/fa";
 import Slider from "./Slider";
-import Marquee from "./ui/Marquee/Marquee";
+import Marquee from "../ui/Marquee/Marquee";
 
 const slides = [
   "./images/slides/1.jpeg",

@@ -6,13 +6,13 @@ import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-import slide_image_1 from '../../public/images/alumni_photos/ankush_khanna.jpeg';
-import slide_image_2 from '../../public/images/alumni_photos/sandeep_jain.jpeg';
-import slide_image_3 from '../../public/images/alumni_photos/anubhav_sethi.jpeg';
-import slide_image_4 from '../../public/images/alumni_photos/manisha_bansal.jpeg';
-import slide_image_5 from '../../public/images/alumni_photos/nikhil_aggarwal.jpeg';
-import slide_image_6 from '../../public/images/alumni_photos/manoj_yadav.jpeg';
-import slide_image_7 from '../../public/images/alumni_photos/seema_goel.jpeg';
+import slide_image_1 from "../../../public/images/alumni_photos/ankush_khanna.jpeg"
+import slide_image_2 from '../../../public/images/alumni_photos/sandeep_jain.jpeg';
+import slide_image_3 from '../../../public/images/alumni_photos/anubhav_sethi.jpeg';
+import slide_image_4 from '../../../public/images/alumni_photos/manisha_bansal.jpeg';
+import slide_image_5 from '../../../public/images/alumni_photos/nikhil_aggarwal.jpeg';
+import slide_image_6 from '../../../public/images/alumni_photos/manoj_yadav.jpeg';
+import slide_image_7 from '../../../public/images/alumni_photos/seema_goel.jpeg';
 
 function Slider() {
   const data = [

@@ -1,18 +1,18 @@
 import { Routes, Route } from 'react-router-dom';
-import Homepage from './components/Homepage.jsx';
-import CreateHighlight from './components/CreateHighlight.jsx';
-import Header from './components/Header.jsx';
+import Homepage from './components/Home_DU/Homepage.jsx';
+import CreateHighlight from './components/Coordinator/CreateHighlight.jsx';
+import Header from './components/Utilities/Header.jsx';
 import Login from './components/Login/Login.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Footer from './components/Footer.jsx';
-import Register from './components/Register.jsx';
-import EditProfile from './components/EditProfile.jsx';
-import CreateAnnouncement from './components/CreateAnnouncements.jsx';
-import StudentHome from './components/Home/StudentHome.jsx';
+import Footer from './components/Utilities/Footer.jsx';
+import Register from './components/Student/Register.jsx';
+import EditProfile from './components/Student/EditProfile.jsx';
+import CreateAnnouncement from './components/Coordinator/CreateAnnouncements.jsx';
+import StudentHome from './components/Coordinator-Student/StudentHome.jsx';
 import CreateCompanyForm from './components/Company/CreateCompany.jsx';
 import ViewCompany from './components/Company/ViewCompany.jsx';
-import PlacementPolicy from './components/PlacementPolicy.jsx';
+import PlacementPolicy from './components/Coordinator-Student/PlacementPolicy.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 // Import Protected Route Components
@@ -27,8 +27,8 @@ import CreateJAF from './components/Recruiter/CreateJAF.jsx';
 import ViewJAF from './components/Recruiter/ViewJAF.jsx';
 import ViewProfile from './components/Recruiter/ViewProfile.jsx';
 import EditProfileRecruiter from './components/Recruiter/EditProfileRecruiter.jsx';
-import ViewRecruiters from './components/ViewRecruiters.jsx';
-import RecruiterProfileView from './components/RecruiterProfileView.jsx';
+import ViewRecruiters from './components/Coordinator/ViewRecruiters.jsx';
+import RecruiterProfileView from './components/Coordinator/RecruiterProfileView.jsx';
 
 
 export default function App() {

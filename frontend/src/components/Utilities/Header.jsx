@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, FileText, MailCheck, Plus, Megaphone, Star, Building, Briefcase, Users } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from ".././context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext"; 
 import { Eye, Edit } from 'lucide-react';
 
 const Header = () => {
