@@ -271,30 +271,62 @@ export const updateJAF = async (req, res) => {
 };
 
 // ===============================
-// DELETE JAF
+// DELETE JAF - Enhanced with proper cleanup
 // ===============================
 export const deleteJAF = async (req, res) => {
   try {
     const { jafId } = req.params;
+    
+    console.log("Attempting to delete JAF with ID:", jafId);
 
-    const jaf = await JAF.findByIdAndDelete(jafId);
+    // First, find the JAF to get the recruiterId
+    const jaf = await JAF.findById(jafId);
 
     if (!jaf) {
+      console.log("JAF not found for ID:", jafId);
       return res.status(404).json({ message: "JAF not found." });
     }
 
-    // Remove JAF reference from recruiter
-    await Recruiter.findByIdAndUpdate(
-      jaf.recruiterId,
-      { $pull: { jafs: jafId } }
-    );
+    console.log("Found JAF:", jaf._id, "for recruiter:", jaf.recruiterId);
 
-    res.status(200).json({ message: "JAF deleted successfully" });
+    // Delete the JAF
+    await JAF.findByIdAndDelete(jafId);
+    console.log("JAF deleted successfully");
+
+    // Remove JAF reference from recruiter
+    const updateResult = await Recruiter.findByIdAndUpdate(
+      jaf.recruiterId,
+      { $pull: { jafs: jafId } },
+      { new: true }
+    );
+    
+    console.log("Recruiter update result:", updateResult ? "Success" : "Failed");
+
+    // Also clean up any associated companies
+    try {
+      const { default: Company } = await import('../Models/Company.js');
+      const deletedCompany = await Company.findOneAndDelete({ jafId: jafId });
+      if (deletedCompany) {
+        console.log("Associated company also deleted:", deletedCompany.title);
+      }
+    } catch (companyError) {
+      console.log("No associated company to delete or error:", companyError.message);
+      // Don't fail the main operation if company deletion fails
+    }
+
+    res.status(200).json({ 
+      message: "JAF deleted successfully",
+      deletedJafId: jafId
+    });
   } catch (error) {
     console.error("Error deleting JAF:", error);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res.status(500).json({ 
+      message: "Internal Server Error", 
+      error: error.message 
+    });
   }
 };
+
 
 // Add this method to your recruiter controller file
 

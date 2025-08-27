@@ -50,7 +50,7 @@ const ViewJAF = () => {
       setError(null);
 
       // Fetch JAF data first
-      const jafResponse = await axios.get(`http://localhost:5000/jaf/${jafId}`);
+      const jafResponse = await axios.get(`http://localhost:5000/recruiter/jaf/${jafId}`);
       const jafData = jafResponse.data;
       setJaf(jafData);
 

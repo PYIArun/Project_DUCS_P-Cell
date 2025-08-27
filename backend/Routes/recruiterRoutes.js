@@ -15,36 +15,35 @@ import {
 
 const router = express.Router();
 
-// Authentication routes (will be accessed as /recruiter/register, /recruiter/login)
+// Authentication routes
 router.post("/register", registerRecruiter);
 router.post("/login", loginRecruiter);
 
-// Get all recruiters (will be accessed as /recruiters when mounted at /recruiters)
-// This route should be first to avoid conflicts with /:email
+// Get all recruiters
 router.get("/", getAllRecruiters);
 
-// Get recruiter by company name (for RecruiterProfileView component)
+// Get recruiter by company name
 router.get("/company/:companyName", getRecruiterByCompanyName);
 
 // Profile routes
 router.put("/:email/complete-profile", completeProfile);
 
-// JAF routes
+// JAF routes - Fixed order and structure
 router.post("/:recruiterId/jaf", createJAF);
 router.get("/:recruiterId/jafs", getJAFsByRecruiter);
+
+// JAF-specific routes - these should come before the general /:email route
 router.get("/jaf/:jafId", getJAFById);
 router.put("/jaf/:jafId", updateJAF);
-router.delete("/jaf/:jafId", deleteJAF);
+router.delete("/jaf/:jafId", deleteJAF); // This is the key fix
 
 // JAF applied students routes
 router.get("/jaf/:jafId/applied-students", async (req, res) => {
   try {
     const { jafId } = req.params;
     
-    // Import Company model here to avoid circular dependency
     const { default: Company } = await import('../Models/Company.js');
     
-    // Find company linked to this JAF
     const company = await Company.findOne({ jafId: jafId });
     
     if (!company) {
@@ -84,17 +83,14 @@ router.put("/jaf/:jafId/student-status", async (req, res) => {
       });
     }
 
-    // Import Company model here to avoid circular dependency
     const { default: Company } = await import('../Models/Company.js');
     
-    // Find company linked to this JAF
     const company = await Company.findOne({ jafId: jafId });
     
     if (!company) {
       return res.status(404).json({ message: 'No company found for this JAF' });
     }
 
-    // Find and update the specific student's status
     const studentIndex = company.applied_students.findIndex(
       student => student.email === studentEmail
     );
@@ -123,7 +119,7 @@ router.put("/jaf/:jafId/student-status", async (req, res) => {
   }
 });
 
-// Get recruiter by email -
+// Get recruiter by email - This should be last to avoid conflicts
 router.get("/:email", getRecruiterByEmail);
 
 export default router;

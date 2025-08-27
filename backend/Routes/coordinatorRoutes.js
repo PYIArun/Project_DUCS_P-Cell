@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 // 🔹 GET all coordinators
-router.get("/coordinators", getAllCoordinators);  // ✅ Fetch all coordinators
+router.get("/coordinators", getAllCoordinators);  
 
 // 🔹 GET a specific coordinator by email
 router.get("/coordinator/:email", getCoordinatorByEmail);

@@ -66,7 +66,7 @@ const CreateCompany = () => {
         }
     };
 
-    // NEW: Validate JAF ID function
+
     const validateJafId = async (jafId) => {
         if (!jafId.trim()) {
             setJafValidation({
@@ -81,7 +81,8 @@ const CreateCompany = () => {
         setJafValidation(prev => ({ ...prev, isValidating: true }));
         
         try {
-            const response = await axios.get(`http://localhost:5000/jaf/${jafId}`);
+            // Fix: Use the correct endpoint path
+            const response = await axios.get(`http://localhost:5000/recruiter/jaf/${jafId}`);
             const jafData = response.data;
             
             // Check if JAF is already linked to a company
@@ -92,7 +93,7 @@ const CreateCompany = () => {
                     isValidating: false,
                     isValid: false,
                     jafDetails: null,
-                    validationMessage: '❌ This JAF is already linked to a company'
+                    validationMessage: 'This JAF is already linked to a company'
                 });
                 return;
             }
@@ -108,9 +109,9 @@ const CreateCompany = () => {
                 description: jafData.jobProfile?.jobDescription || prev.description,
                 // Map recruitment type to job_type
                 job_type: jafData.recruitmentType?.fullTime === 'YES' ? 'Full-time' :
-                         jafData.recruitmentType?.internship === 'YES' ? 'Internship' :
-                         jafData.recruitmentType?.internshipPlusFullTime === 'YES' ? 'Internship + full-time' :
-                         'Full-time',
+                        jafData.recruitmentType?.internship === 'YES' ? 'Internship' :
+                        jafData.recruitmentType?.internshipPlusFullTime === 'YES' ? 'Internship + full-time' :
+                        'Full-time',
                 // Map courses to applicable_courses
                 applicable_courses: [
                     ...(jafData.coursesAllowed?.msc === 'Yes' ? ['MSc'] : []),
@@ -129,7 +130,7 @@ const CreateCompany = () => {
                 isValidating: false,
                 isValid: true,
                 jafDetails: jafData,
-                validationMessage: '✅ JAF found and form auto-populated'
+                validationMessage: 'JAF found and form auto-populated'
             });
             
         } catch (error) {
@@ -138,11 +139,12 @@ const CreateCompany = () => {
                 isValidating: false,
                 isValid: false,
                 jafDetails: null,
-                validationMessage: '❌ JAF not found or invalid'
+                validationMessage: error.response?.status === 404 ? 
+                    'JAF not found with this ID' : 
+                    'Error validating JAF ID'
             });
         }
     };
-
     // NEW: Handle JAF ID change with debounce
     const handleJafIdChange = (e) => {
         const jafId = e.target.value;

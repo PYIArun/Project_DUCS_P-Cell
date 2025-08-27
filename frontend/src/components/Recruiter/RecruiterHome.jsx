@@ -79,29 +79,48 @@ const RecruiterHome = () => {
     navigate(`/recruiter/jaf/${jafId}`);
   };
 
-  const handleDeleteJAF = async (jafId) => {
-    if (window.confirm('Are you sure you want to delete this JAF?')) {
-      try {
-        await axios.delete(`http://localhost:5000/jaf/${jafId}`);
-        toast.success('JAF deleted successfully', {
-          position: "bottom-center",
-          autoClose: 3000,
-          theme: "light",
-          transition: Bounce,
-        });
-        fetchJAFs();
-        fetchLinkedCompanies(); // Refresh linked companies
-      } catch (error) {
-        console.error('Error deleting JAF:', error);
-        toast.error('Error deleting JAF', {
-          position: "bottom-center",
-          autoClose: 3000,
-          theme: "light",
-          transition: Bounce,
-        });
-      }
+  // Fixed handleDeleteJAF function for RecruiterHome.jsx
+const handleDeleteJAF = async (jafId) => {
+  if (window.confirm('Are you sure you want to delete this JAF?')) {
+    try {
+      console.log("Deleting JAF with ID:", jafId);
+      
+      // Fixed endpoint - should match the route in your router
+      const response = await axios.delete(`http://localhost:5000/recruiter/jaf/${jafId}`);
+      
+      console.log("Delete response:", response.data);
+      
+      toast.success('JAF deleted successfully', {
+        position: "bottom-center",
+        autoClose: 3000,
+        theme: "light",
+        transition: Bounce,
+      });
+      
+      // Refresh the JAFs list
+      fetchJAFs();
+      // Refresh linked companies
+      fetchLinkedCompanies();
+      
+    } catch (error) {
+      console.error('Error deleting JAF:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      const errorMessage = error.response?.data?.message || 'Error deleting JAF';
+      
+      toast.error(errorMessage, {
+        position: "bottom-center",
+        autoClose: 3000,
+        theme: "light",
+        transition: Bounce,
+      });
     }
-  };
+  }
+};
 
   const copyToClipboard = async (id) => {
     try {
