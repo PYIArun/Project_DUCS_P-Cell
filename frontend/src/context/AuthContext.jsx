@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }) => {
       const storedEmail = sessionStorage.getItem("userEmail");
       const storedLoginStatus = sessionStorage.getItem("loginStatus");
       const storedRole = sessionStorage.getItem("role");
-      const recruiterToken = sessionStorage.getItem("recruiterToken");
       
       if (storedEmail && storedLoginStatus === "true") {
         setUserEmail(storedEmail);
@@ -43,51 +42,60 @@ export const AuthProvider = ({ children }) => {
         
         // Handle different user types
         if (storedRole === "Student") {
-          const response = await axios.get(`http://localhost:5000/student/${storedEmail}`);
-          const student = response.data;
-          setUserRegistered(student.registered === "yes");
+          try {
+            const response = await axios.get(`http://localhost:5000/student/${storedEmail}`);
+            const student = response.data;
+            setUserRegistered(student.registered === "yes");
+          } catch (error) {
+            console.error("Error fetching student data:", error);
+            // Don't logout on student fetch error, just set registered to false
+            setUserRegistered(false);
+          }
         } else if (storedRole === "Recruiter") {
-          // Fetch recruiter data
-          const response = await axios.get(`http://localhost:5000/recruiter/${storedEmail}`);
-          const recruiter = response.data;
-          setUserRegistered(recruiter.registered === "yes");
-          setRecruiterId(recruiter.id);
-          setProfileCompleted(recruiter.profileCompleted);
-          setCompanyName(recruiter.companyName);
+          try {
+            // Fetch recruiter data
+            const response = await axios.get(`http://localhost:5000/recruiter/${storedEmail}`);
+            const recruiter = response.data;
+            console.log("HELLO: ", recruiter);
+            setUserRegistered(recruiter.registered === "yes");
+            setRecruiterId(recruiter.id);
+            setProfileCompleted(recruiter.profileCompleted);
+            setCompanyName(recruiter.companyName);
+          } catch (error) {
+            console.error("Error fetching recruiter data:", error);
+            // Set defaults instead of logging out
+            setUserRegistered(false);
+            setRecruiterId(null);
+            setProfileCompleted(false);
+            setCompanyName(null);
+          }
         } else {
           // For coordinators, assume they're always "registered"
           setUserRegistered(true);
         }
-      } else if (recruiterToken) {
-        // Handle recruiter token authentication
-        try {
-          // Decode token or validate with backend
-          // For now, just check if token exists and validate with backend
-          const response = await axios.get("http://localhost:5000/recruiter/validate", {
-            headers: { Authorization: `Bearer ${recruiterToken}` }
-          });
-          
-          if (response.data.valid) {
-            const recruiter = response.data.recruiter;
-            setUserEmail(recruiter.email);
-            setIsLogin(true);
-            setRole("Recruiter");
-            setUserRegistered(true);
-            setRecruiterId(recruiter.id);
-            setProfileCompleted(recruiter.profileCompleted);
-            setCompanyName(recruiter.companyName);
-          }
-        } catch (error) {
-          console.error("Token validation error:", error);
-          sessionStorage.removeItem("recruiterToken");
-        }
+      } else {
+        // No valid auth found, reset state
+        setUserEmail(null);
+        setIsLogin(false);
+        setRole(null);
+        setUserRegistered(false);
+        setRecruiterId(null);
+        setProfileCompleted(false);
+        setCompanyName(null);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      // If there's an error, clear the session
-      logout();
+      console.error("Error in checkAuthStatus:", error);
+      // Don't call logout() here as it might cause infinite loops
+      // Just reset the auth state
+      setUserEmail(null);
+      setIsLogin(false);
+      setRole(null);
+      setUserRegistered(false);
+      setRecruiterId(null);
+      setProfileCompleted(false);
+      setCompanyName(null);
     } finally {
-      setLoading(false);
+      setLoading(false); // Always set loading to false
     }
   };
 

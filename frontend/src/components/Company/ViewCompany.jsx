@@ -394,20 +394,20 @@ const ViewCompany = () => {
         <div className="flex items-start gap-6">
           {/* Logo */}
           <div className="flex-shrink-0">
-            {company.logo ? (
+            {/* {company.logo ? ( */}
               <img
-                src={company.logo}
+                src="https://upload.wikimedia.org/wikipedia/en/thumb/4/45/Ciena_logo.svg/2560px-Ciena_logo.svg.png"
                 alt={`${company.title || "Company"} logo`}
                 className="w-20 h-20 rounded-lg border border-gray-200 object-contain bg-white p-2"
                 onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/80x80?text=Logo";
+                  e.target.src = "https://upload.wikimedia.org/wikipedia/en/thumb/4/45/Ciena_logo.svg/2560px-Ciena_logo.svg.png";
                 }}
               />
-            ) : (
+            {/* ) : (
               <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
                 <span className="text-gray-400 text-xs">No Logo</span>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Company Info */}
@@ -437,6 +437,9 @@ const ViewCompany = () => {
           </div>
 
           {/* Apply Button */}
+          {
+            role == 'Student' &&
+
           <div className="flex-shrink-0">
             {hasApplied ? (
               <button
@@ -456,6 +459,9 @@ const ViewCompany = () => {
               </button>
             )}
           </div>
+
+          }
+
         </div>
       </div>
 

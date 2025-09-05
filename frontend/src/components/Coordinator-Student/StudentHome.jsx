@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const StudentHome = () => {
   const [active, setActive] = useState("latest");
   const [announcements, setAnnouncements] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const {role} = useAuth();
   const navigate = useNavigate();
 
   const handleApplyClick = (id) => {
@@ -237,11 +238,11 @@ const StudentHome = () => {
                             <div className="flex items-center flex-1">
                               <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 p-2">
                                 <img
-                                  src={company.logo || "https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg"}
+                                  src={company.logo || "https://upload.wikimedia.org/wikipedia/en/thumb/4/45/Ciena_logo.svg/2560px-Ciena_logo.svg.png"}
                                   alt={`${company.title} logo`}
                                   className="w-full h-full object-contain"
                                   onError={(e) => {
-                                    e.target.src = "https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg";
+                                    e.target.src = "https://upload.wikimedia.org/wikipedia/en/thumb/4/45/Ciena_logo.svg/2560px-Ciena_logo.svg.png";
                                   }}
                                 />
                               </div>
@@ -282,7 +283,7 @@ const StudentHome = () => {
                                 className="bg-[#72265F] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#913e7c] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-100 active:scale-95"
                                 onClick={() => handleApplyClick(company._id)}
                               >
-                                Apply Now
+                                View Details
                               </button>
                             </div>
                           </div>

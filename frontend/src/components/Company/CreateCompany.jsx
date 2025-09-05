@@ -641,7 +641,7 @@ const CreateCompany = () => {
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 flex w-[82px] h-[82px] align-center p-1 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                                                 <img
-                                                    src={company.logo || "https://upload.wikimedia.org/wikipedia/en/4/45/Ciena_logo.svg"}
+                                                    src={company.logo || "https://upload.wikimedia.org/wikipedia/en/thumb/4/45/Ciena_logo.svg/2560px-Ciena_logo.svg.png"}
                                                     alt={`${company.title} logo`}
                                                     className="max-w-full w-auto h-auto object-contain mx-auto my-auto"
                                                 />

@@ -168,7 +168,7 @@ const handleDeleteJAF = async (jafId) => {
       }
 
       // Fetch applied students for this JAF via the linked company
-      const response = await axios.get(`http://localhost:5000/jaf/${jaf._id}/applied-students`);
+      const response = await axios.get(`http://localhost:5000/recruiter/jaf/${jaf._id}/applied-students`);
       const appliedStudentsData = response.data.applied_students || [];
       
       // Fetch detailed student information for each applied student
@@ -218,7 +218,7 @@ const handleDeleteJAF = async (jafId) => {
   const handleStatusChange = async (studentEmail, newStatus) => {
     try {
       // Update student status via JAF route
-      await axios.put(`http://localhost:5000/jaf/${selectedJaf._id}/student-status`, {
+      await axios.put(`http://localhost:5000/recruiter/jaf/${selectedJaf._id}/student-status`, {
         studentEmail,
         status: newStatus
       });

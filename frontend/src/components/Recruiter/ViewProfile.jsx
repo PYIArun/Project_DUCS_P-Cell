@@ -9,32 +9,85 @@ import axios from 'axios';
 import { Building, Phone, Globe, Mail, User, Edit, Eye } from 'lucide-react';
 
 const ViewProfile = () => {
-  const { userEmail, companyName } = useAuth();
+  const { userEmail, companyName, loading: authLoading } = useAuth(); // Add authLoading
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
 
   useEffect(() => {
+    // Don't fetch if auth is still loading
+    if (authLoading) return;
+    
+    // Don't fetch if no userEmail
+    if (!userEmail) {
+      setLoading(false);
+      return;
+    }
+    
     fetchProfileData();
-  }, [userEmail]);
+  }, [userEmail, authLoading]); // Add authLoading as dependency
 
   const fetchProfileData = async () => {
     try {
       setLoading(true);
+      console.log('Fetching profile for email:', userEmail); // Debug log
+      
       const response = await axios.get(`http://localhost:5000/recruiter/${userEmail}`);
+      console.log('Profile data received:', response.data); // Debug log
+      
       setProfileData(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
-      toast.error('Error loading profile data', {
-        position: "bottom-center",
-        autoClose: 3000,
-        theme: "light",
-        transition: Bounce,
-      });
+      
+      // More specific error handling
+      if (error.response?.status === 404) {
+        toast.error('Profile not found. Please check your registration.', {
+          position: "bottom-center",
+          autoClose: 5000,
+          theme: "light",
+          transition: Bounce,
+        });
+      } else {
+        toast.error('Error loading profile data', {
+          position: "bottom-center",
+          autoClose: 3000,
+          theme: "light",
+          transition: Bounce,
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[60rem] mx-auto flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#72265F] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if no user email after auth is complete
+  if (!authLoading && !userEmail) {
+    return (
+      <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[60rem] mx-auto flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Please log in to view your profile</p>
+          <Button 
+            onClick={() => navigate("/auth")} 
+            className="mt-4 bg-[#72265F] hover:bg-[#913e7c] text-white"
+          >
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -63,6 +116,7 @@ const ViewProfile = () => {
     );
   }
 
+  // Rest of your component remains the same...
   return (
     <div className="font-instrument min-h-screen py-8 px-4 w-full max-w-[60rem] mx-auto">
       {/* Header */}

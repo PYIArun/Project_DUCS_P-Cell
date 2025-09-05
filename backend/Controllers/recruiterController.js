@@ -104,7 +104,7 @@ export const loginRecruiter = async (req, res) => {
 export const getRecruiterByEmail = async (req, res) => {
   try {
     const { email } = req.params;
-
+    
     let recruiter = await Recruiter.findOne({ email }).populate('jafs');
 
     if (!recruiter) {

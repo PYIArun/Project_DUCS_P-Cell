@@ -126,51 +126,51 @@ export default function App() {
         <Route
           path="/recruiter/home"
           element={
-            <RecruiterRoute>
+            <ProtectedRoute allowedRoles={["Recruiter"]}>
               <RecruiterHome />
-            </RecruiterRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/recruiter/complete-profile"
           element={
-            <RecruiterRoute>
+               <ProtectedRoute allowedRoles={["Recruiter"]}>
               <CompleteProfile />
-            </RecruiterRoute>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/recruiter/create-jaf"
           element={
-            <RecruiterRoute>
+             <ProtectedRoute allowedRoles={["Recruiter"]}>
               <CreateJAF />
-            </RecruiterRoute>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/recruiter/jaf/:jafId"
           element={
-            <RecruiterRoute>
+        <ProtectedRoute allowedRoles={["Recruiter"]}>
               <ViewJAF />
-            </RecruiterRoute>
+        </ProtectedRoute>
           }
         />  
         <Route
           path="/recruiter/view-profile"
           element={
-            <RecruiterRoute>
+            <ProtectedRoute allowedRoles={["Recruiter"]}>
               <ViewProfile />
-            </RecruiterRoute>
+            </ProtectedRoute>
           }
         />
       <Route
         path="/recruiter/edit-profile"
         element={
-          <RecruiterRoute>
+          <ProtectedRoute allowedRoles={["Recruiter"]}>
             <EditProfileRecruiter />
-          </RecruiterRoute>
+          </ProtectedRoute>
         }
       />
 
